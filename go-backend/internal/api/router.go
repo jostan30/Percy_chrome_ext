@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/api/handlers"
+	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/middleware"
 )
 
 type Server struct {
@@ -28,6 +29,12 @@ func (s *Server) routes() {
 }
 
 func (s *Server) Start() error {
-	return http.ListenAndServe(s.addr ,s.mux)
+	handler := middleware.Chain(
+		s.mux,
+		middleware.Recovery,
+		middleware.Logger,
+		middleware.CORS,
+	)
+	return http.ListenAndServe(s.addr ,handler)
 }
 
