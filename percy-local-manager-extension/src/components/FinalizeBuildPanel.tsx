@@ -1,11 +1,16 @@
 import { useFinalizeBuild } from '../hooks/useFinalizeBuild';
 
 interface FinalizeBuildPanelProps {
+  token: string;
   disabled: boolean;
   onFinalized: () => void;
 }
 
-export function FinalizeBuildPanel({ disabled, onFinalized }: FinalizeBuildPanelProps) {
+export function FinalizeBuildPanel({
+  token,
+  disabled,
+  onFinalized,
+}: FinalizeBuildPanelProps) {
   const { status, error, result, finalize } = useFinalizeBuild(onFinalized);
 
   const isFinalizing = status === 'loading';
@@ -20,8 +25,8 @@ export function FinalizeBuildPanel({ disabled, onFinalized }: FinalizeBuildPanel
     <div className="panel">
       <button
         className="button button--secondary"
-        onClick={() => finalize()}
-        disabled={disabled || isFinalizing}
+        onClick={() => finalize(token)}
+        disabled={disabled || isFinalizing || token.trim() === ''}
       >
         {isFinalizing ? 'Finalizing Build…' : 'Finalize Build'}
       </button>
@@ -29,13 +34,19 @@ export function FinalizeBuildPanel({ disabled, onFinalized }: FinalizeBuildPanel
       {status === 'success' && result && (
         <div className="finalize-result">
           <p className="message message--success">Build Finished</p>
-          <button className="button button--link" onClick={handleOpenBuild}>
+
+          <button
+            className="button button--link"
+            onClick={handleOpenBuild}
+          >
             Open Percy Build
           </button>
         </div>
       )}
 
-      {status === 'error' && <p className="message message--error">{error}</p>}
+      {status === 'error' && (
+        <p className="message message--error">{error}</p>
+      )}
     </div>
   );
 }

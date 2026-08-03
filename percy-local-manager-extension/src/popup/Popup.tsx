@@ -3,7 +3,6 @@ import { useSnapshotQueue } from '../hooks/useSnapshotQueue';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { QueueCount } from '../components/QueueCount';
 import { CaptureSnapshotPanel } from '../components/CaptureSnapshotPanel';
-import { FinalizeBuildPanel } from '../components/FinalizeBuildPanel';
 
 /**
  * The extension's only job: capture browser state and hand it to the local
@@ -26,7 +25,17 @@ export function Popup() {
 
       <CaptureSnapshotPanel disabled={isBackendOffline} onCaptured={queue.refresh} />
 
-      <FinalizeBuildPanel disabled={isBackendOffline || queue.count === 0} onFinalized={queue.refresh} />
+     <button
+        className="button button--secondary"
+        onClick={() =>
+          chrome.tabs.create({
+            url: chrome.runtime.getURL('snapshots.html'),
+          })
+        }
+        disabled={isBackendOffline}
+      >
+        View Snapshots
+      </button>
     </main>
   );
 }
