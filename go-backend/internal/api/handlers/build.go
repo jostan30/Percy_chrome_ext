@@ -32,14 +32,17 @@ func (h *BuildHandler) Finalize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.app.BuildService.Finalize(req.Token); err != nil {
+	result , err := h.app.BuildService.Finalize(req.Token)
+	if err != nil {
 		httpx.WriteJSON(w, http.StatusInternalServerError ,map [string] string {
 			"error": err.Error(),
 		})
 		return
-}
+	}
 
 	httpx.WriteJSON(w, http.StatusOK, map[string] string {
 		"message":"Percy started successfully",
+		"buildId": result.BuildID,
+		"buildUrl": result.BuildURL,
 	}) 
 }

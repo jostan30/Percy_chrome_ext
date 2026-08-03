@@ -15,13 +15,14 @@ func main () {
 
 	snapshotService := service.NewSnapshotService(store)
 
-	percyController := percy.NewController()
-
+	binary := percy.NewBinary()
+	controller := percy.NewController(binary)
 	client := percy.NewClient()
 	
 	buildService := service.NewBuildService(
-		percyController,
+		controller,
 		client,
+		snapshotService,
 	)
 
 	application := &app.App{
