@@ -1,9 +1,8 @@
 package app
 
-import (
-	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/snapshot"
-)
+import "github.com/jostan30/Percy_chrome_ext/go-backend/internal/service"
 
 type App struct {
-	Snapshots snapshot.Store
+	SnapshotService *service.SnapshotService
+	BuildService *service.BuildService
 }

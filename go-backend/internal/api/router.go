@@ -29,6 +29,7 @@ func NewServer ( addr string , app *app.App) *Server {
 
 func (s *Server) routes() {
 	snapshotHandler := handlers.NewSnapshotHandler(s.app)
+	buildHandler := handlers.NewBuildHandler(s.app)
 
 	s.mux.HandleFunc("/health" , handlers.Health)
 	s.mux.HandleFunc("/status" , handlers.Status)
@@ -49,6 +50,8 @@ func (s *Server) routes() {
 			http.Error(w, "Method Not Allowed" ,http.StatusMethodNotAllowed)
 		}
 	})
+
+	s.mux.HandleFunc("/build/finalize", buildHandler.Finalize)
 }
 
 func (s *Server) Start() error {

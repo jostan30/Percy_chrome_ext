@@ -5,13 +5,14 @@ import (
 	"net/http"
 
 	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/httpx"
-	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/snapshot"
 	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/app"
+	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/api/dto"
 )
 
 type SnapshotHandler struct {
 	app *app.App
 }
+
 
 func NewSnapshotHandler(app * app.App) *SnapshotHandler {
 	return &SnapshotHandler {
@@ -21,28 +22,41 @@ func NewSnapshotHandler(app * app.App) *SnapshotHandler {
 
 
 func (h *SnapshotHandler) Create(w http.ResponseWriter ,r *http.Request) {
-	var s snapshot.Snapshot
+	var req dto.CreateSnapshotRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httpx.WriteJSON(w ,http.StatusBadRequest ,map[string]string{
 			"error": "invalid request body",
 		})
 		return
 	}
 
-	h.app.Snapshots.Add(s)
+	if err := req.Validate(); err != nil {
+		httpx.WriteJSON(w, http.StatusBadRequest ,map[string]string{
+			"error":err.Error(),
+		})
+		return
+	}
 
-	httpx.WriteJSON(w, http.StatusCreated ,map[string]string{
+	snap , err := h.app.SnapshotService.Create(req.ToSnapshot())
+	if err !=nil {
+		httpx.WriteJSON(w ,http.StatusInternalServerError ,map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	httpx.WriteJSON(w, http.StatusCreated ,map[string]any{
 		"message":"Snapshot created",
+		"snap": snap,
 	})
 }
 
 func (h *SnapshotHandler) List(w http.ResponseWriter ,r *http.Request) {
-	httpx.WriteJSON(w , http.StatusOK ,h.app.Snapshots.All())
+	httpx.WriteJSON(w , http.StatusOK ,h.app.SnapshotService.List())
 }
 
 func (h *SnapshotHandler) Clear(w http.ResponseWriter ,r *http.Request) {
-	h.app.Snapshots.Clear() 
+	h.app.SnapshotService.Clear() 
 	
 	httpx.WriteJSON(w, http.StatusOK , map[string]string{
 		"message": "Snapshots cleared",
