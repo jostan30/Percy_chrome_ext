@@ -3,6 +3,7 @@ import { getSnapshots } from '../services/backendApi';
 import { SnapshotRow } from '../components/SnapshotRow';
 import { FinalizeBuildPanel } from '../components/FinalizeBuildPanel';
 import { ClearSnapshotsButton } from '../components/ClearSnapshotsButton';
+import { BrandMark } from '../components/BrandMark';
 import type { Snapshot } from '../types';
 
 export function SnapshotsPage() {
@@ -25,60 +26,83 @@ export function SnapshotsPage() {
   }, []);
 
   return (
-    <main className="snapshots-page">
-      <header className="page-header">
-        <h1>Percy Snapshots</h1>
-        <p>{snapshots.length} snapshot(s) queued</p>
-      </header>
-
-      {loading && <div className="loading-state">Loading…</div>}
-
-      {!loading && snapshots.length === 0 && (
-        <div className="empty-state">No snapshots available.</div>
-      )}
-
-      {!loading && snapshots.length > 0 && (
-        <div className="table-wrap">
-          <table className="snapshot-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>URL</th>
-                <th>Viewport</th>
-              </tr>
-            </thead>
-            <tbody>
-              {snapshots.map((snapshot, index) => (
-                <SnapshotRow key={`${snapshot.name}-${index}`} snapshot={snapshot} />
-              ))}
-            </tbody>
-          </table>
+    <>
+      <div className="topbar">
+        <div className="topbar__inner">
+          <div className="topbar__brand">
+            <BrandMark size={24} />
+            <div className="topbar__brand-text">
+              <span className="topbar__title">Percy</span>
+              <span className="topbar__subtitle">Local Manager</span>
+            </div>
+          </div>
         </div>
-      )}
-
-      <div className="token-section">
-        <label htmlFor="percy-token">Percy Token</label>
-        <input
-          id="percy-token"
-          type="password"
-          className="input"
-          placeholder="Enter Percy Token"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-        />
       </div>
+      <div className="topbar__accent-strip" aria-hidden="true" />
 
-      <div className="page-actions">
-        <ClearSnapshotsButton
-          disabled={snapshots.length === 0}
-          onCleared={refresh}
-        />
-        <FinalizeBuildPanel
-          token={token}
-          disabled={snapshots.length === 0 || token.trim() === ''}
-          onFinalized={refresh}
-        />
-      </div>
-    </main>
+      <main className="snapshots-page">
+        <div className="page-header">
+          <div>
+            <h1>Snapshot Queue</h1>
+            <p>Review what's captured before you finalize a Percy build.</p>
+          </div>
+          <div className="stat-pill">
+            <span className="stat-pill__value">{loading ? '—' : snapshots.length}</span>
+            <span className="stat-pill__label">Queued</span>
+          </div>
+        </div>
+
+        {loading && <div className="loading-state">Loading snapshots…</div>}
+
+        {!loading && snapshots.length === 0 && (
+          <div className="empty-state">
+            No snapshots queued yet. Capture one from the extension popup to get started.
+          </div>
+        )}
+
+        {!loading && snapshots.length > 0 && (
+          <div className="table-wrap">
+            <table className="snapshot-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>URL</th>
+                  <th>Viewport</th>
+                </tr>
+              </thead>
+              <tbody>
+                {snapshots.map((snapshot, index) => (
+                  <SnapshotRow key={`${snapshot.name}-${index}`} snapshot={snapshot} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="token-section">
+          <label htmlFor="percy-token">Percy Token</label>
+          <input
+            id="percy-token"
+            type="password"
+            className="input"
+            placeholder="Enter Percy Token"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+          />
+        </div>
+
+        <div className="page-actions">
+          <ClearSnapshotsButton
+            disabled={snapshots.length === 0}
+            onCleared={refresh}
+          />
+          <FinalizeBuildPanel
+            token={token}
+            disabled={snapshots.length === 0 || token.trim() === ''}
+            onFinalized={refresh}
+          />
+        </div>
+      </main>
+    </>
   );
 }

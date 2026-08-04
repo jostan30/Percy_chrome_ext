@@ -9,16 +9,10 @@ export function SnapshotCard({ snapshot }: SnapshotCardProps) {
     <div className="snapshot-card">
       <h3>{snapshot.name}</h3>
 
-      <p>
-        <strong>URL</strong>
-      </p>
-
+      <strong>URL</strong>
       <p>{snapshot.url}</p>
 
-      <p>
-        <strong>Viewport</strong>
-      </p>
-
+      <strong>Viewport</strong>
       <p>
         {snapshot.viewportWidth} × {snapshot.viewportHeight}
       </p>

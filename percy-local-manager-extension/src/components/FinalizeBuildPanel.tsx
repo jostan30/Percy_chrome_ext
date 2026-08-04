@@ -22,9 +22,9 @@ export function FinalizeBuildPanel({
   }
 
   return (
-    <div className="panel">
+    <div className="finalize-build">
       <button
-        className="button button--secondary"
+        className="button button--primary"
         onClick={() => finalize(token)}
         disabled={disabled || isFinalizing || token.trim() === ''}
       >
@@ -33,13 +33,10 @@ export function FinalizeBuildPanel({
 
       {status === 'success' && result && (
         <div className="finalize-result">
-          <p className="message message--success">Build Finished</p>
+          <p className="message message--success">✓ Build finished</p>
 
-          <button
-            className="button button--link"
-            onClick={handleOpenBuild}
-          >
-            Open Percy Build
+          <button className="button button--link" onClick={handleOpenBuild}>
+            Open Percy Build →
           </button>
         </div>
       )}

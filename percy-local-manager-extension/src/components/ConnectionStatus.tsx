@@ -5,9 +5,9 @@ interface ConnectionStatusProps {
 }
 
 const LABELS: Record<ConnectionStatusType, string> = {
-  checking: 'Checking connection…',
-  connected: 'Backend Connected',
-  offline: 'Backend Offline'
+  checking: 'Checking…',
+  connected: 'Connected',
+  offline: 'Offline'
 };
 
 export function ConnectionStatus({ status }: ConnectionStatusProps) {
