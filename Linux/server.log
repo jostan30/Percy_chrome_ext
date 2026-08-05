@@ -1,0 +1,9 @@
+2026/08/05 14:39:13 Starting server on port http://localhost:4321
+2026/08/05 14:39:26  Started GET /health
+2026/08/05 14:39:26 Completed in 69.089µs
+2026/08/05 14:39:26  Started GET /snapshots
+2026/08/05 14:39:26 Completed in 89.141µs
+2026/08/05 14:39:31  Started GET /health
+2026/08/05 14:39:31 Completed in 90.609µs
+2026/08/05 14:39:36  Started GET /health
+2026/08/05 14:39:36 Completed in 140.74µs
