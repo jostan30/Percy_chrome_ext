@@ -8,6 +8,8 @@ export const ENDPOINTS = {
   HEALTH: `${BACKEND_BASE_URL}/health`,
   LIBRARY_TOKEN: `${BACKEND_BASE_URL}/library/token`,
   LIBRARY_SEARCH: `${BACKEND_BASE_URL}/library/search`, 
+  LIBRARY_STATUS: `${BACKEND_BASE_URL}/library/status`, 
+  LIBRARY_ALL: `${BACKEND_BASE_URL}/library/all`, 
 } as const;
 
 // How often the popup polls /health while it's open.

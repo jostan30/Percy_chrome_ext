@@ -382,3 +382,126 @@ body {
   font-size: 10.5px;
   color: var(--ink-500);
 }
+
+.panel--compact {
+  padding: 10px 14px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.library-connected {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-700);
+}
+
+.library-connected__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success-600);
+  flex-shrink: 0;
+}
+
+.library-match {
+  background: var(--ink-100);
+  border: 1px solid var(--ink-150);
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.library-match:hover {
+  border-color: var(--violet-400);
+}
+
+.library-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: var(--font-body);
+}
+
+.library-page__title {
+  font-family: var(--font-display);
+  margin-bottom: 14px;
+}
+
+.library-page__search {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.library-grid__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--ink-150);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+}
+
+.library-grid__item:hover {
+  border-color: var(--violet-400);
+  box-shadow: var(--shadow-sm);
+}
+
+.library-grid__preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--ink-100);
+}
+
+.library-grid__preview--empty {
+  display: flex;
+}
+
+.library-grid__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-page {
+  max-width: 640px;
+  margin: 40px auto;
+  padding: 0 24px;
+  font-family: var(--font-body);
+}
+
+.detail-page__title {
+  font-family: var(--font-display);
+}
+
+.detail-page__subtitle {
+  color: var(--ink-500);
+  margin-top: -8px;
+}
+
+.detail-page__image {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ink-150);
+  margin-top: 12px;
+}

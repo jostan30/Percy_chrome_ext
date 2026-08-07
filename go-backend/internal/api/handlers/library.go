@@ -59,3 +59,31 @@ func(h *LibraryHandler) Search(w http.ResponseWriter ,r *http.Request) {
 		results,
 	)
 }
+
+func (h *LibraryHandler) Status(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	httpx.WriteJSON(
+		w,
+		http.StatusOK,
+		h.app.LibraryService.Status(),
+	)
+}
+
+// All returns the entire cached library. Used by the library browser page,
+// which needs the full set up front rather than incremental search.
+func (h *LibraryHandler) All(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	httpx.WriteJSON(
+		w,
+		http.StatusOK,
+		h.app.LibraryService.All(),
+	)
+}

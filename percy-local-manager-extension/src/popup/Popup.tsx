@@ -1,6 +1,5 @@
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
 import { useSnapshotQueue } from '../hooks/useSnapshotQueue';
-import { useLibraryToken } from '../hooks/useLibraryToken';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { QueueCount } from '../components/QueueCount';
 import { CaptureSnapshotPanel } from '../components/CaptureSnapshotPanel';
@@ -10,10 +9,8 @@ import { BrandMark } from '../components/BrandMark';
 export function Popup() {
   const connectionStatus = useConnectionStatus();
   const queue = useSnapshotQueue();
-  const { status: libraryStatus } = useLibraryToken();
 
   const isBackendOffline = connectionStatus === 'offline';
-  const isLibraryConnected = libraryStatus === 'success';
 
   return (
     <main className="popup">
@@ -32,7 +29,7 @@ export function Popup() {
       <div className="popup__body">
         <QueueCount count={queue.count} isLoading={queue.isLoading} />
 
-        {!isLibraryConnected && <LibraryTokenPanel />}
+        <LibraryTokenPanel />
 
         <CaptureSnapshotPanel disabled={isBackendOffline} onCaptured={queue.refresh} />
 
@@ -46,6 +43,14 @@ export function Popup() {
           disabled={isBackendOffline}
         >
           View Snapshots
+        </button>
+
+        <button
+          className="button button--secondary button--block"
+          onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('library.html') })}
+          disabled={isBackendOffline}
+        >
+          Browse Library
         </button>
       </div>
     </main>

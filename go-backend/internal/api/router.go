@@ -57,7 +57,10 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/build/finalize", buildHandler.Finalize)
 
 	s.mux.HandleFunc("/library/token" ,libraryHandler.SetToken)
-	s.mux.HandleFunc("/library/search", libraryHandler.Search)
+	s.mux.HandleFunc("/library/search", libraryHandler.Search)		
+	s.mux.HandleFunc("/library/status", libraryHandler.Status)
+	s.mux.HandleFunc("/library/all", libraryHandler.All)
+	
 }
 
 func (s *Server) Start() error {

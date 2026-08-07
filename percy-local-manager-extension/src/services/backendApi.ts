@@ -79,3 +79,19 @@ export async function searchLibrary(query: string): Promise<LibrarySnapshotRefer
   const data = await parseJsonOrThrow(response);
   return Array.isArray(data) ? (data as LibrarySnapshotReference[]) : [];
 }
+
+export interface LibraryStatus {
+  connected: boolean;
+  count: number;
+}
+
+export async function getLibraryStatus(): Promise<LibraryStatus> {
+  const response = await fetch(ENDPOINTS.LIBRARY_STATUS);
+  return (await parseJsonOrThrow(response)) as LibraryStatus;
+}
+
+export async function getAllLibrarySnapshots(): Promise<LibrarySnapshotReference[]> {
+  const response = await fetch(ENDPOINTS.LIBRARY_ALL);
+  const data = await parseJsonOrThrow(response);
+  return Array.isArray(data) ? (data as LibrarySnapshotReference[]) : [];
+}

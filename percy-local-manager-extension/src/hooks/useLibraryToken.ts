@@ -1,23 +1,49 @@
-import { useState } from 'react';
-import { setLibraryToken } from '../services/backendApi';
+import { useEffect, useState } from 'react';
+import { setLibraryToken, getLibraryStatus } from '../services/backendApi';
 
-type Status = 'idle' | 'loading' | 'success' | 'error';
+type SaveStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export function useLibraryToken() {
-  const [status, setStatus] = useState<Status>('idle');
+  const [isConnected, setIsConnected] = useState(false);
+  const [count, setCount] = useState(0);
+  const [isChecking, setIsChecking] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    getLibraryStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setIsConnected(status.connected);
+        setCount(status.count);
+      })
+      .catch(() => {
+        // backend offline or unreachable — leave isConnected false, the
+        // ConnectionStatus indicator already surfaces this elsewhere
+      })
+      .finally(() => {
+        if (!cancelled) setIsChecking(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   async function saveToken(token: string) {
-    setStatus('loading');
+    setSaveStatus('loading');
     setError(null);
     try {
       await setLibraryToken(token);
-      setStatus('success');
+      const status = await getLibraryStatus();
+      setIsConnected(status.connected);
+      setCount(status.count);
+      setSaveStatus('success');
     } catch (err) {
-      setStatus('error');
+      setSaveStatus('error');
       setError(err instanceof Error ? err.message : 'Failed to save token');
     }
   }
 
-  return { status, error, saveToken };
+  return { isConnected, count, isChecking, saveStatus, error, saveToken };
 }

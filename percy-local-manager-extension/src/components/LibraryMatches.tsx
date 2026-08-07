@@ -4,7 +4,19 @@ interface LibraryMatchesProps {
   results: LibrarySnapshotReference[];
   isSearching: boolean;
 }
+function openSnapshotDetail(ref: LibrarySnapshotReference) {
+  console.log("Clicked snapshot", ref);
 
+  chrome.storage.local.set(
+    { "library:selectedSnapshot": ref },
+    () => {
+      console.log("Storage saved");
+      chrome.tabs.create({
+        url: chrome.runtime.getURL("library-snapshot.html"),
+      });
+    }
+  );
+}
 export function LibraryMatches({ results, isSearching }: LibraryMatchesProps) {
   if (isSearching) return <p className="field-label">Searching library...</p>;
   if (results.length === 0) return null;
@@ -15,7 +27,12 @@ export function LibraryMatches({ results, isSearching }: LibraryMatchesProps) {
         Existing snapshot{results.length > 1 ? 's' : ''} found — for reference
       </span>
       {results.map((ref) => (
-        <div className="library-match" key={`${ref.buildId ?? ''}-${ref.name}`}>
+        <button
+          className="library-match"
+          key={`${ref.buildId ?? ''}-${ref.name}`}
+          onClick={() => openSnapshotDetail(ref)}
+          type="button"
+        >
           {ref.previewUrl && (
             <img className="library-match__preview" src={ref.previewUrl} alt={ref.name} />
           )}
@@ -23,7 +40,7 @@ export function LibraryMatches({ results, isSearching }: LibraryMatchesProps) {
             <span className="library-match__name">{ref.name}</span>
             {ref.testCaseName && <span className="library-match__test">{ref.testCaseName}</span>}
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );
