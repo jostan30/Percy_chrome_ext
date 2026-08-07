@@ -30,6 +30,7 @@ func NewServer ( addr string , app *app.App) *Server {
 func (s *Server) routes() {
 	snapshotHandler := handlers.NewSnapshotHandler(s.app)
 	buildHandler := handlers.NewBuildHandler(s.app)
+	libraryHandler := handlers.NewLibraryHandler(s.app)
 
 	s.mux.HandleFunc("/health" , handlers.Health)
 	s.mux.HandleFunc("/status" , handlers.Status)
@@ -51,7 +52,12 @@ func (s *Server) routes() {
 		}
 	})
 
+
+
 	s.mux.HandleFunc("/build/finalize", buildHandler.Finalize)
+
+	s.mux.HandleFunc("/library/token" ,libraryHandler.SetToken)
+	s.mux.HandleFunc("/library/search", libraryHandler.Search)
 }
 
 func (s *Server) Start() error {
