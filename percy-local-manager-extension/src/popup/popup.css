@@ -338,3 +338,47 @@ body {
   border: 1px solid #b7ead4;
   border-radius: var(--radius-sm);
 }
+
+.library-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.library-match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--ink-150);
+  border-radius: var(--radius-sm);
+  background: var(--ink-100);
+}
+
+.library-match__preview {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.library-match__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.library-match__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-match__test {
+  font-size: 10.5px;
+  color: var(--ink-500);
+}

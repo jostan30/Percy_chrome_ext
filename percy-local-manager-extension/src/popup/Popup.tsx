@@ -1,19 +1,19 @@
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
 import { useSnapshotQueue } from '../hooks/useSnapshotQueue';
+import { useLibraryToken } from '../hooks/useLibraryToken';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { QueueCount } from '../components/QueueCount';
 import { CaptureSnapshotPanel } from '../components/CaptureSnapshotPanel';
+import { LibraryTokenPanel } from '../components/LibraryTokenPanel';
 import { BrandMark } from '../components/BrandMark';
 
-/**
- * The extension's only job: capture browser state and hand it to the local
- * Go backend. No Percy CLI, tokens, or build logic ever live here.
- */
 export function Popup() {
   const connectionStatus = useConnectionStatus();
   const queue = useSnapshotQueue();
+  const { status: libraryStatus } = useLibraryToken();
 
   const isBackendOffline = connectionStatus === 'offline';
+  const isLibraryConnected = libraryStatus === 'success';
 
   return (
     <main className="popup">
@@ -31,6 +31,8 @@ export function Popup() {
 
       <div className="popup__body">
         <QueueCount count={queue.count} isLoading={queue.isLoading} />
+
+        {!isLibraryConnected && <LibraryTokenPanel />}
 
         <CaptureSnapshotPanel disabled={isBackendOffline} onCaptured={queue.refresh} />
 

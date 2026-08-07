@@ -1,5 +1,5 @@
 import { ENDPOINTS } from '../utils/constants';
-import type { Snapshot, FinalizeBuildResponse } from '../types';
+import type { Snapshot, FinalizeBuildResponse ,LibrarySnapshotReference } from '../types';
 
 /**
  * All communication with the Go backend lives here. This file knows nothing
@@ -63,4 +63,19 @@ const response = await fetch(ENDPOINTS.FINALIZE_BUILD, {
 
 const data = await parseJsonOrThrow(response);
 return data as FinalizeBuildResponse;
+}
+
+export async function setLibraryToken(token: string): Promise<void> {
+  const response = await fetch(ENDPOINTS.LIBRARY_TOKEN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token })
+  });
+  await parseJsonOrThrow(response);
+}
+
+export async function searchLibrary(query: string): Promise<LibrarySnapshotReference[]> {
+  const response = await fetch(`${ENDPOINTS.LIBRARY_SEARCH}?q=${encodeURIComponent(query)}`);
+  const data = await parseJsonOrThrow(response);
+  return Array.isArray(data) ? (data as LibrarySnapshotReference[]) : [];
 }

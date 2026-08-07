@@ -5,7 +5,9 @@ export const BACKEND_BASE_URL = 'http://localhost:4321';
 export const ENDPOINTS = {
   SNAPSHOTS: `${BACKEND_BASE_URL}/snapshots`,
   FINALIZE_BUILD: `${BACKEND_BASE_URL}/build/finalize`,
-  HEALTH: `${BACKEND_BASE_URL}/health`
+  HEALTH: `${BACKEND_BASE_URL}/health`,
+  LIBRARY_TOKEN: `${BACKEND_BASE_URL}/library/token`,
+  LIBRARY_SEARCH: `${BACKEND_BASE_URL}/library/search`, 
 } as const;
 
 // How often the popup polls /health while it's open.

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useCaptureSnapshot } from '../hooks/useCaptureSnapshot';
+import { useLibrarySearch } from '../hooks/useLibrarySearch';
+import { LibraryMatches } from './LibraryMatches';
 
 interface CaptureSnapshotPanelProps {
   disabled: boolean;
@@ -8,6 +10,7 @@ interface CaptureSnapshotPanelProps {
 
 export function CaptureSnapshotPanel({ disabled, onCaptured }: CaptureSnapshotPanelProps) {
   const [name, setName] = useState('');
+  const { results, isSearching } = useLibrarySearch(name);
   const { status, error, capture } = useCaptureSnapshot(onCaptured);
 
   const isCapturing = status === 'loading';
@@ -32,6 +35,7 @@ export function CaptureSnapshotPanel({ disabled, onCaptured }: CaptureSnapshotPa
         onChange={(event) => setName(event.target.value)}
         disabled={disabled || isCapturing}
       />
+      <LibraryMatches results={results} isSearching={isSearching} />
 
       <button
         className="button button--primary button--block"

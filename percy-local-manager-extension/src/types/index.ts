@@ -31,6 +31,12 @@ export interface FinalizeBuildResponse {
   buildUrl: string;
 }
 
+export interface LibrarySnapshotReference {
+  name: string;
+  previewUrl: string;
+  testCaseName?: string;
+  buildId?: string;
+}
 /**
  * Connection status against GET /health.
  */
