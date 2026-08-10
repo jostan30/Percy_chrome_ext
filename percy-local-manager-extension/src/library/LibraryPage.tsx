@@ -29,43 +29,50 @@ export function LibraryPage() {
 
   return (
     <main className="library-page">
-      <h1 className="library-page__title">Snapshot Library</h1>
+      {/* Fixed, non-scrolling header: title + search stay in place */}
+      <div className="library-page__header">
+        <h1 className="library-page__title">Snapshot Library</h1>
 
-      <input
-        className="text-input library-page__search"
-        type="text"
-        placeholder="Search snapshots..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+        <input
+          className="text-input library-page__search"
+          type="text"
+          placeholder="Search snapshots..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
-      {isLoading && <p className="field-label">Loading library...</p>}
-      {loadError && <p className="message message--error">{loadError}</p>}
+      {/* Everything that can grow (result count + grid) scrolls
+          inside this region instead of resizing the extension window */}
+      <div className="library-page__scroll">
+        {isLoading && <p className="field-label">Loading library...</p>}
+        {loadError && <p className="message message--error">{loadError}</p>}
 
-      {!isLoading && !loadError && (
-        <>
-          <p className="field-label">
-            {filtered.length} of {all.length} snapshot{all.length === 1 ? '' : 's'}
-          </p>
-          <div className="library-grid">
-            {filtered.map((ref) => (
-              <button
-                className="library-grid__item"
-                key={`${ref.buildId ?? ''}-${ref.name}`}
-                onClick={() => openSnapshotDetail(ref)}
-                type="button"
-              >
-                {ref.previewUrl ? (
-                  <img className="library-grid__preview" src={ref.previewUrl} alt={ref.name} />
-                ) : (
-                  <div className="library-grid__preview library-grid__preview--empty" />
-                )}
-                <span className="library-grid__name">{ref.name}</span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+        {!isLoading && !loadError && (
+          <>
+            <p className="field-label">
+              {filtered.length} of {all.length} snapshot{all.length === 1 ? '' : 's'}
+            </p>
+            <div className="library-grid">
+              {filtered.map((ref) => (
+                <button
+                  className="library-grid__item"
+                  key={`${ref.buildId ?? ''}-${ref.name}`}
+                  onClick={() => openSnapshotDetail(ref)}
+                  type="button"
+                >
+                  {ref.previewUrl ? (
+                    <img className="library-grid__preview" src={ref.previewUrl} alt={ref.name} />
+                  ) : (
+                    <div className="library-grid__preview library-grid__preview--empty" />
+                  )}
+                  <span className="library-grid__name">{ref.name}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </main>
   );
 }

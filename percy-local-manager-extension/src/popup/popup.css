@@ -1,11 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 :root {
   color-scheme: light;
 
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: Arial, Helvetica, sans-serif;
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-mono: "Courier New", monospace;
 
   /* Ink scale (violet-tinted neutrals) */
   --ink-900: #15121f;
@@ -25,7 +23,6 @@
   --violet-400: #9d84ff;
   --violet-100: #eee8ff;
 
-  --magenta-400: #d15fd0;
   --amber-400: #f0a63e;
 
   --success-600: #17976b;
@@ -33,18 +30,19 @@
   --error-600: #d6403a;
   --error-100: #fdeceb;
 
-  --diff-gradient: linear-gradient(90deg, #6c47ff 0%, #c34fd6 55%, #f0a63e 100%);
-
   --radius-lg: 14px;
   --radius-md: 10px;
   --radius-sm: 7px;
 
-  --shadow-sm: 0 1px 2px rgba(21, 18, 31, 0.06);
-  --shadow-md: 0 10px 28px -10px rgba(21, 18, 31, 0.22);
+  --border-color: var(--ink-150);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 body {
@@ -52,13 +50,37 @@ body {
   font-family: var(--font-body);
   background: var(--canvas);
   color: var(--ink-900);
-  -webkit-font-smoothing: antialiased;
 }
+
+/* ---------- Fixed extension shell ----------
+   Only .popup is the real extension popup, so only it is locked to
+   340x480 and never resizes, no matter how much content it holds.
+   .library-page and .detail-page open in real browser tabs
+   (chrome.tabs.create), so they stay normal, unconstrained pages. */
 
 .popup {
   width: 340px;
+  min-width: 340px;
+  max-width: 340px;
+  height: 480px;
+  min-height: 480px;
+  max-height: 480px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+/* Put page content that can grow (lists, search results, long
+   detail bodies) inside an element with this class. It fills the
+   remaining space under any fixed header and scrolls internally,
+   so the 340x480 shell above never changes size. */
+.ext-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ---------- Header ---------- */
@@ -89,7 +111,6 @@ body {
   font-family: var(--font-display);
   font-size: 14.5px;
   font-weight: 700;
-  letter-spacing: -0.01em;
 }
 
 .popup__subtitle {
@@ -102,7 +123,7 @@ body {
 
 .popup__accent-strip {
   height: 3px;
-  background: var(--diff-gradient);
+  background: var(--violet-600);
 }
 
 /* ---------- Body ---------- */
@@ -112,6 +133,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ---------- Connection status chip ---------- */
@@ -124,7 +149,7 @@ body {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--ink-700);
   color: var(--ink-100);
 }
 
@@ -138,22 +163,14 @@ body {
 
 .connection-status--connected .connection-status__dot {
   background: #34d399;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
 }
 
 .connection-status--offline .connection-status__dot {
   background: #f87171;
-  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.25);
 }
 
 .connection-status--checking .connection-status__dot {
   background: var(--amber-400);
-  animation: pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
 }
 
 /* ---------- Queue stat card ---------- */
@@ -164,9 +181,8 @@ body {
   align-items: center;
   padding: 13px 15px;
   background: var(--surface);
-  border: 1px solid var(--ink-150);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
 }
 
 .queue-count__label {
@@ -192,9 +208,8 @@ body {
   gap: 10px;
   padding: 14px;
   background: var(--surface);
-  border: 1px solid var(--ink-150);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
 }
 
 .panel__eyebrow {
@@ -213,19 +228,17 @@ body {
 
 .text-input {
   padding: 9px 11px;
-  border: 1px solid var(--ink-150);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-family: var(--font-body);
   background: var(--canvas);
   color: var(--ink-900);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .text-input:focus {
   outline: none;
   border-color: var(--violet-500);
-  box-shadow: 0 0 0 3px var(--violet-100);
   background: var(--surface);
 }
 
@@ -244,15 +257,10 @@ body {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-}
-
-.button:active:not(:disabled) {
-  transform: scale(0.98);
 }
 
 .button:disabled {
@@ -281,7 +289,7 @@ body {
 .button--danger {
   background: transparent;
   color: var(--error-600);
-  border: 1px solid var(--ink-150);
+  border: 1px solid var(--border-color);
 }
 
 .button--danger:not(:disabled):hover {
@@ -350,9 +358,18 @@ body {
   align-items: center;
   gap: 8px;
   padding: 6px;
-  border: 1px solid var(--ink-150);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--ink-100);
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.library-match:hover {
+  border-color: var(--violet-400);
 }
 
 .library-match__preview {
@@ -407,51 +424,48 @@ body {
   flex-shrink: 0;
 }
 
-.library-match {
-  background: var(--ink-100);
-  border: 1px solid var(--ink-150);
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-  font-family: var(--font-body);
-}
-
-.library-match:hover {
-  border-color: var(--violet-400);
-}
-
 .library-page {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 24px;
   font-family: var(--font-body);
+}
+
+.library-page__header {
+  padding: 24px 32px 0;
+  flex: 0 0 auto;
 }
 
 .library-page__title {
   font-family: var(--font-display);
-  margin-bottom: 14px;
+  font-size: 15px;
+  margin: 0 0 10px;
 }
 
 .library-page__search {
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+
+.library-page__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 32px 32px;
 }
 
 .library-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
-  margin-top: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
 .library-grid__item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
+  gap: 4px;
+  padding: 6px;
   background: var(--surface);
-  border: 1px solid var(--ink-150);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-align: left;
   font-family: var(--font-body);
@@ -459,7 +473,6 @@ body {
 
 .library-grid__item:hover {
   border-color: var(--violet-400);
-  box-shadow: var(--shadow-sm);
 }
 
 .library-grid__preview {
@@ -475,7 +488,7 @@ body {
 }
 
 .library-grid__name {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
   color: var(--ink-900);
   overflow: hidden;
@@ -484,14 +497,21 @@ body {
 }
 
 .detail-page {
-  max-width: 640px;
-  margin: 40px auto;
-  padding: 0 24px;
   font-family: var(--font-body);
+}
+
+.detail-page__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px 48px;
 }
 
 .detail-page__title {
   font-family: var(--font-display);
+  font-size: 15px;
+  margin: 0 0 4px;
 }
 
 .detail-page__subtitle {
@@ -502,6 +522,6 @@ body {
 .detail-page__image {
   width: 100%;
   border-radius: var(--radius-md);
-  border: 1px solid var(--ink-150);
+  border: 1px solid var(--border-color);
   margin-top: 12px;
 }
