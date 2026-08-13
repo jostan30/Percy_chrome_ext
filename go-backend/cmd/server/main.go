@@ -17,7 +17,8 @@ func main () {
 	snapshotService := service.NewSnapshotService(store)
 
 	binary := percy.NewBinary()
-	controller := percy.NewController(binary)
+	installer := percy.NewInstaller(binary)
+	controller := percy.NewController(binary,installer)
 	client := percy.NewClient()
 
 	buildService := service.NewBuildService(
