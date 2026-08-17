@@ -49,6 +49,8 @@ func toSnapshotRequest(s snapshot.Snapshot) SnapshotRequest {
 		},
 
 		MinHeight: s.ViewportHeight,
+		EnableJavaScript: s.EnableJavaScript,
+		PercyCSS:         s.PercyCSS,
 	}
 }
 

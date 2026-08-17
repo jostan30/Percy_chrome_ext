@@ -12,6 +12,8 @@ type CreateSnapshotRequest struct {
 	DOM string `json:"dom"`
 	ViewportWidth int `json:"viewportWidth"`
 	ViewportHeight int `json:"viewportHeight"`
+	EnableJavaScript bool   `json:"enableJavaScript"`
+	PercyCSS         string `json:"percyCSS"`
 }
 
 func (r CreateSnapshotRequest) Validate() error {
@@ -24,7 +26,7 @@ func (r CreateSnapshotRequest) Validate() error {
 	}
 
 	if r.DOM == "" {
-		return errors.New("DOM is reqiured")
+		return errors.New("DOM is required")
 	}
 
 	if r.ViewportWidth <= 0 {
@@ -44,5 +46,7 @@ func (r CreateSnapshotRequest) ToSnapshot() snapshot.Snapshot {
 		DOM: r.DOM,
 		ViewportWidth: r.ViewportWidth,
 		ViewportHeight: r.ViewportHeight,
+		EnableJavaScript: r.EnableJavaScript,
+		PercyCSS:         r.PercyCSS,
 	}
 }

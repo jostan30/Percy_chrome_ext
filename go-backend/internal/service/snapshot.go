@@ -32,6 +32,10 @@ func (s *SnapshotService) List() []snapshot.Snapshot {
 	return s.store.All()
 }
 
+func (s *SnapshotService) Delete(id string) bool {
+	return s.store.Delete(id)
+}
+
 func (s *SnapshotService) Clear() {
 	s.store.Clear()
 }

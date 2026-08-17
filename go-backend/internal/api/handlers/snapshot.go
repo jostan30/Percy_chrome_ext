@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/httpx"
 	"github.com/jostan30/Percy_chrome_ext/go-backend/internal/app"
@@ -48,6 +49,30 @@ func (h *SnapshotHandler) Create(w http.ResponseWriter ,r *http.Request) {
 	httpx.WriteJSON(w, http.StatusCreated ,map[string]any{
 		"message":"Snapshot created",
 		"snap": snap,
+	})
+}
+
+func (h *SnapshotHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id := strings.TrimPrefix(r.URL.Path, "/snapshots/")
+
+	if id == "" {
+		httpx.WriteJSON(w, http.StatusBadRequest, map[string]string{
+			"error": "snapshot id is required",
+		})
+		return
+	}
+
+	deleted := h.app.SnapshotService.Delete(id)
+
+	if !deleted {
+		httpx.WriteJSON(w, http.StatusNotFound, map[string]string{
+			"error": "snapshot not found",
+		})
+		return
+	}
+
+	httpx.WriteJSON(w, http.StatusOK, map[string]string{
+		"message": "Snapshot deleted",
 	})
 }
 

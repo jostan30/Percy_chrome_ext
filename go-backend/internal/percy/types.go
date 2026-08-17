@@ -1,7 +1,7 @@
 package percy
 
 type HealthResponse struct {
-	Sucess bool `json:"success"`
+	Success bool `json:"success"`
 
 	Build struct {
 		ID string `json:"id"`
@@ -21,6 +21,8 @@ type SnapshotRequest struct {
 	EnvironmentInfo  []string          `json:"environmentInfo,omitempty"`
 	ClientInfo       string            `json:"clientInfo,omitempty"`
 
-	EnableJavaScript bool              `json:"enableJavaScript,omitempty"`
+	EnableJavaScript bool   			`json:"enableJavaScript,omitempty"`
+	PercyCSS         string 			`json:"percyCSS,omitempty"`
+
 	RequestHeaders   map[string]string `json:"requestHeaders,omitempty"`
 }
