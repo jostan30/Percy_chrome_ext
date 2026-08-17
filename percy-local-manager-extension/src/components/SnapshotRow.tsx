@@ -9,6 +9,10 @@ export function SnapshotRow({
   snapshot,
   onDeleted,
 }: SnapshotRowProps) {
+  const hasPercyCSS =
+    typeof snapshot.percyCSS === 'string' &&
+    snapshot.percyCSS.trim().length > 0;
+
   return (
     <tr className="snapshot-row">
       <td className="snapshot-row__name">
@@ -24,6 +28,26 @@ export function SnapshotRow({
 
       <td className="snapshot-row__viewport">
         {snapshot.viewportWidth} × {snapshot.viewportHeight}
+      </td>
+
+      <td className="snapshot-row__options">
+        {snapshot.enableJavaScript && (
+          <span
+            className="snapshot-option snapshot-option--js"
+            title="JavaScript enabled"
+          >
+            JS
+          </span>
+        )}
+
+        {hasPercyCSS && (
+          <span
+            className="snapshot-option snapshot-option--css"
+            title="Custom Percy CSS configured"
+          >
+            CSS
+          </span>
+        )}
       </td>
 
       <td className="snapshot-row__actions">

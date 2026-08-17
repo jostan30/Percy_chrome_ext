@@ -440,3 +440,34 @@ body {
   opacity: 0.45;
   cursor: not-allowed;
 }
+/* ---------- Snapshot options ---------- */
+
+.snapshot-row__options {
+  white-space: nowrap;
+}
+
+.snapshot-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 7px;
+  margin-right: 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.snapshot-option--js {
+  color: var(--violet-700);
+  background: var(--violet-100);
+}
+
+.snapshot-option--css {
+  color: #8a5a16;
+  background: #fff3dc;
+}
+
+.snapshot-option:last-child {
+  margin-right: 0;
+}

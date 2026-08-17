@@ -100,6 +100,7 @@ export function SnapshotsPage() {
                   <th>Name</th>
                   <th>URL</th>
                   <th>Viewport</th>
+                  <th>Options</th>
                   <th>Actions</th>
                 </tr>
               </thead>
