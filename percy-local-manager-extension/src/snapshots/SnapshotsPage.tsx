@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getSnapshots } from '../services/backendApi';
+import {
+  deleteSnapshot,
+  getSnapshots,
+} from '../services/backendApi';
 import { SnapshotRow } from '../components/SnapshotRow';
 import { FinalizeBuildPanel } from '../components/FinalizeBuildPanel';
 import { ClearSnapshotsButton } from '../components/ClearSnapshotsButton';
@@ -13,11 +16,23 @@ export function SnapshotsPage() {
 
   async function refresh() {
     setLoading(true);
+
     try {
       const data = await getSnapshots();
       setSnapshots(data);
+    } catch (error) {
+      console.error('Failed to load snapshots:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await deleteSnapshot(id);
+      await refresh();
+    } catch (error) {
+      console.error('Failed to delete snapshot:', error);
     }
   }
 
@@ -31,6 +46,7 @@ export function SnapshotsPage() {
         <div className="topbar__inner">
           <div className="topbar__brand">
             <BrandMark size={24} />
+
             <div className="topbar__brand-text">
               <span className="topbar__title">Percy</span>
               <span className="topbar__subtitle">Local Manager</span>
@@ -38,21 +54,37 @@ export function SnapshotsPage() {
           </div>
         </div>
       </div>
-      <div className="topbar__accent-strip" aria-hidden="true" />
+
+      <div
+        className="topbar__accent-strip"
+        aria-hidden="true"
+      />
 
       <main className="snapshots-page">
         <div className="page-header">
           <div>
             <h1>Snapshot Queue</h1>
-            <p>Review what's captured before you finalize a Percy build.</p>
+            <p>
+              Review what's captured before you finalize a Percy build.
+            </p>
           </div>
+
           <div className="stat-pill">
-            <span className="stat-pill__value">{loading ? '—' : snapshots.length}</span>
-            <span className="stat-pill__label">Queued</span>
+            <span className="stat-pill__value">
+              {loading ? '—' : snapshots.length}
+            </span>
+
+            <span className="stat-pill__label">
+              Queued
+            </span>
           </div>
         </div>
 
-        {loading && <div className="loading-state">Loading snapshots…</div>}
+        {loading && (
+          <div className="loading-state">
+            Loading snapshots…
+          </div>
+        )}
 
         {!loading && snapshots.length === 0 && (
           <div className="empty-state">
@@ -68,11 +100,21 @@ export function SnapshotsPage() {
                   <th>Name</th>
                   <th>URL</th>
                   <th>Viewport</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
-                {snapshots.map((snapshot, index) => (
-                  <SnapshotRow key={`${snapshot.name}-${index}`} snapshot={snapshot} />
+                {snapshots.map((snapshot) => (
+                  <SnapshotRow
+                    key={snapshot.id}
+                    snapshot={snapshot}
+                    onDeleted={() => {
+                      if (snapshot.id) {
+                        handleDelete(snapshot.id);
+                      }
+                    }}
+                  />
                 ))}
               </tbody>
             </table>
@@ -80,7 +122,10 @@ export function SnapshotsPage() {
         )}
 
         <div className="token-section">
-          <label htmlFor="percy-token">Percy Token</label>
+          <label htmlFor="percy-token">
+            Percy Token
+          </label>
+
           <input
             id="percy-token"
             type="password"
@@ -96,9 +141,13 @@ export function SnapshotsPage() {
             disabled={snapshots.length === 0}
             onCleared={refresh}
           />
+
           <FinalizeBuildPanel
             token={token}
-            disabled={snapshots.length === 0 || token.trim() === ''}
+            disabled={
+              snapshots.length === 0 ||
+              token.trim() === ''
+            }
             onFinalized={refresh}
           />
         </div>

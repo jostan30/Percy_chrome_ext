@@ -8,15 +8,25 @@ interface CaptureSnapshotPanelProps {
   onCaptured: () => void;
 }
 
-export function CaptureSnapshotPanel({ disabled, onCaptured }: CaptureSnapshotPanelProps) {
+export function CaptureSnapshotPanel({
+  disabled,
+  onCaptured,
+}: CaptureSnapshotPanelProps) {
   const [name, setName] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [enableJavaScript, setEnableJavaScript] = useState(false);
+  const [percyCSS, setPercyCSS] = useState('');
+
   const { results, isSearching } = useLibrarySearch(name);
   const { status, error, capture } = useCaptureSnapshot(onCaptured);
 
   const isCapturing = status === 'loading';
 
   async function handleCapture() {
-    await capture(name);
+    await capture(name, {
+      enableJavaScript,
+      percyCSS,
+    });
   }
 
   return (
@@ -26,6 +36,7 @@ export function CaptureSnapshotPanel({ disabled, onCaptured }: CaptureSnapshotPa
       <label className="field-label" htmlFor="snapshot-name">
         Snapshot name (optional)
       </label>
+
       <input
         id="snapshot-name"
         className="text-input"
@@ -35,7 +46,102 @@ export function CaptureSnapshotPanel({ disabled, onCaptured }: CaptureSnapshotPa
         onChange={(event) => setName(event.target.value)}
         disabled={disabled || isCapturing}
       />
-      <LibraryMatches results={results} isSearching={isSearching} />
+
+      <LibraryMatches
+        results={results}
+        isSearching={isSearching}
+      />
+
+      <button
+        type="button"
+        className="advanced-options-toggle"
+        onClick={() => setShowAdvanced((current) => !current)}
+        disabled={disabled || isCapturing}
+      >
+        <span className="advanced-options-toggle__left">
+          <span className="advanced-options-toggle__icon">
+            ⚙
+          </span>
+
+          <span>
+            Advanced options
+          </span>
+        </span>
+
+        <span
+          className={`advanced-options-toggle__chevron ${
+            showAdvanced
+              ? 'advanced-options-toggle__chevron--open'
+              : ''
+          }`}
+        >
+          ›
+        </span>
+      </button>
+
+      {showAdvanced && (
+        <div className="advanced-options">
+          <div className="capture-option">
+            <div className="capture-option__header">
+              <div>
+                <label
+                  className="field-label"
+                  htmlFor="enable-javascript"
+                >
+                  Enable JavaScript
+                </label>
+
+                <p className="field-help">
+                  Allow JavaScript to run when Percy renders the snapshot.
+                </p>
+              </div>
+
+              <button
+                id="enable-javascript"
+                type="button"
+                className={`toggle ${
+                  enableJavaScript ? 'toggle--active' : ''
+                }`}
+                role="switch"
+                aria-checked={enableJavaScript}
+                onClick={() =>
+                  setEnableJavaScript((current) => !current)
+                }
+                disabled={disabled || isCapturing}
+              >
+                <span className="toggle__track">
+                  <span className="toggle__thumb" />
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="capture-option">
+            <label
+              className="field-label"
+              htmlFor="percy-css"
+            >
+              Percy CSS (optional)
+            </label>
+
+            <textarea
+              id="percy-css"
+              className="text-input textarea"
+              placeholder={`.cookie-banner {
+  display: none;
+}`}
+              value={percyCSS}
+              onChange={(event) => setPercyCSS(event.target.value)}
+              disabled={disabled || isCapturing}
+              rows={5}
+            />
+
+            <p className="field-help">
+              CSS applied when Percy renders this snapshot.
+            </p>
+          </div>
+        </div>
+      )}
 
       <button
         className="button button--primary button--block"
@@ -46,21 +152,43 @@ export function CaptureSnapshotPanel({ disabled, onCaptured }: CaptureSnapshotPa
           'Capturing…'
         ) : (
           <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
               <path
-                d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .83-.45l.94-1.4A1 1 0 0 1 9.8 3.5h4.4a1 1 0 0 1 .83.45l.94 1.4a1 1 0 0 0 .83.45H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"
+                d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .83-.45l.94-1.4A1 1 0 0 1 9.8 3.5h4.4a1 1 0 0 1 .83.45l.94 1.4A1 1 0 0 0 18 6h0a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"
                 stroke="currentColor"
                 strokeWidth="1.6"
               />
-              <circle cx="12" cy="12.5" r="3.4" stroke="currentColor" strokeWidth="1.6" />
+              <circle
+                cx="12"
+                cy="12.5"
+                r="3.4"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
             </svg>
+
             Capture Snapshot
           </>
         )}
       </button>
 
-      {status === 'success' && <p className="message message--success">✓ Snapshot saved</p>}
-      {status === 'error' && <p className="message message--error">{error}</p>}
+      {status === 'success' && (
+        <p className="message message--success">
+          ✓ Snapshot saved
+        </p>
+      )}
+
+      {status === 'error' && (
+        <p className="message message--error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

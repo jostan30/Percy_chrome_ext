@@ -396,3 +396,47 @@ body {
   gap: 6px;
   align-items: flex-end;
 }
+
+/* ---------- Snapshot row actions ---------- */
+
+.snapshot-row__actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.snapshot-row__delete {
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-500);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.snapshot-row__delete:hover {
+  color: var(--error-600);
+  background: var(--error-100);
+  border-color: #f3aca7;
+}
+
+.snapshot-row__delete:active {
+  background: #f9d9d6;
+}
+
+.snapshot-row__delete:focus-visible {
+  outline: 2px solid var(--violet-400);
+  outline-offset: 2px;
+}
+
+.snapshot-row__delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

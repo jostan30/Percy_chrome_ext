@@ -525,3 +525,152 @@ body {
   border: 1px solid var(--border-color);
   margin-top: 12px;
 }
+
+/* ---------- Advanced capture options ---------- */
+
+.advanced-options-toggle {
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--ink-700);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-top: 1px solid var(--border-color);
+  margin-top: 2px;
+}
+
+.advanced-options-toggle:hover {
+  color: var(--violet-600);
+}
+
+.advanced-options-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.advanced-options-toggle__left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.advanced-options-toggle__icon {
+  font-size: 12px;
+}
+
+.advanced-options-toggle__chevron {
+  font-size: 17px;
+  line-height: 1;
+  transform: rotate(0deg);
+  transition: transform 0.15s ease;
+}
+
+.advanced-options-toggle__chevron--open {
+  transform: rotate(90deg);
+}
+
+/* ---------- Advanced options container ---------- */
+
+.advanced-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0 2px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ---------- Capture options ---------- */
+
+.capture-option {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.capture-option__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.capture-option__header > div {
+  min-width: 0;
+}
+
+.field-help {
+  margin: 3px 0 0;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--ink-500);
+}
+
+/* ---------- JavaScript toggle ---------- */
+
+.toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink-300);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle--active {
+  background: var(--violet-600);
+}
+
+.toggle__track {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 999px;
+}
+
+.toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
+}
+
+.toggle--active .toggle__thumb {
+  transform: translateX(16px);
+}
+
+/* ---------- Percy CSS ---------- */
+
+.textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.45;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.textarea::placeholder {
+  color: var(--ink-300);
+}

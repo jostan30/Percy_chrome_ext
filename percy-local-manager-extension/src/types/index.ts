@@ -4,11 +4,15 @@
  * The extension never adds Percy-specific fields here.
  */
 export interface Snapshot {
+  id?: string;
   name: string;
   url: string;
   dom: string;
   viewportWidth: number;
   viewportHeight: number;
+
+  enableJavaScript: boolean;
+  percyCSS?: string;
 }
 
 /**

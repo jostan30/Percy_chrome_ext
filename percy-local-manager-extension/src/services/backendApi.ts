@@ -43,6 +43,17 @@ const data = await parseJsonOrThrow(response);
 return Array.isArray(data) ? (data as Snapshot[]) : [];
 }
 
+export async function deleteSnapshot(id: string): Promise<void> {
+  const response = await fetch(
+    `${ENDPOINTS.SNAPSHOTS}/${encodeURIComponent(id)}`,
+    {
+      method: 'DELETE',
+    }
+  );
+
+  await parseJsonOrThrow(response);
+}
+
 export async function clearSnapshots(): Promise<void> {
 const response = await fetch(ENDPOINTS.SNAPSHOTS, { method: 'DELETE' });
 await parseJsonOrThrow(response);
