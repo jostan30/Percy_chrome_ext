@@ -1,3 +1,6 @@
 # Snapshots
 snapshot/
 server
+
+# Test Companion onboarding (local, per-machine)
+.test-companion/

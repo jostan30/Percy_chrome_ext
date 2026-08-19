@@ -44,13 +44,13 @@ func toSnapshotRequest(s snapshot.Snapshot) SnapshotRequest {
 		URL:         s.URL,
 		DomSnapshot: s.DOM,
 
-		Widths: []int{
-			s.ViewportWidth,
-		},
+		Widths:    s.Widths,
+		MinHeight: s.MinHeight,
 
-		MinHeight: s.ViewportHeight,
 		EnableJavaScript: s.EnableJavaScript,
-		PercyCSS:         s.PercyCSS,
+
+		PercyCSS: s.PercyCSS,
+		Scope:    s.Scope,
 	}
 }
 

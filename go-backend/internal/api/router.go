@@ -53,13 +53,21 @@ func (s *Server) routes() {
 	})
 
 	s.mux.HandleFunc("/snapshots/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-			return
-		}
+	switch r.Method {
+	case http.MethodPatch:
+		snapshotHandler.Update(w, r)
 
+	case http.MethodDelete:
 		snapshotHandler.Delete(w, r)
-	})
+
+	default:
+		http.Error(
+			w,
+			"Method Not Allowed",
+			http.StatusMethodNotAllowed,
+		)
+	}
+})
 
 	s.mux.HandleFunc("/build/finalize", buildHandler.Finalize)
 
