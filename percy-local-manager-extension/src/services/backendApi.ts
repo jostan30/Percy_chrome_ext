@@ -43,17 +43,30 @@ const data = await parseJsonOrThrow(response);
 return Array.isArray(data) ? (data as Snapshot[]) : [];
 }
 
+export async function updateSnapshot(
+  id: string,
+  updates: Partial<Omit<Snapshot, 'id' | 'createdAt'>>
+): Promise<Snapshot> {
+  const response = await fetch(`${ENDPOINTS.SNAPSHOTS}/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updates),
+  });
+
+  const data = await parseJsonOrThrow(response);
+
+  return (data as { snapshot: Snapshot }).snapshot;
+}
+
 export async function deleteSnapshot(id: string): Promise<void> {
-  const response = await fetch(
-    `${ENDPOINTS.SNAPSHOTS}/${encodeURIComponent(id)}`,
-    {
-      method: 'DELETE',
-    }
-  );
+  const response = await fetch(`${ENDPOINTS.SNAPSHOTS}/${id}`, {
+    method: 'DELETE',
+  });
 
   await parseJsonOrThrow(response);
 }
-
 export async function clearSnapshots(): Promise<void> {
 const response = await fetch(ENDPOINTS.SNAPSHOTS, { method: 'DELETE' });
 await parseJsonOrThrow(response);

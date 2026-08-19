@@ -4,15 +4,18 @@ import { createSnapshot } from '../services/backendApi';
 import { formatDefaultSnapshotName } from '../utils/formatSnapshotName';
 import type { AsyncStatus } from '../types';
 
-interface CaptureOptions {
+interface SnapshotCaptureOptions {
+  widths: number[];
+  minHeight: number;
   enableJavaScript: boolean;
   percyCSS: string;
+  scope: string;
 }
 
 interface UseCaptureSnapshotResult {
   status: AsyncStatus;
   error: string | null;
-  capture: (name?: string, options?: CaptureOptions) => Promise<void>;
+  capture: (name?: string, options?: SnapshotCaptureOptions) => Promise<void>;
   reset: () => void;
 }
 
@@ -31,50 +34,54 @@ export function useCaptureSnapshot(
   const [error, setError] = useState<string | null>(null);
 
   const capture = useCallback(
-    async (
-      name?: string,
-      options: CaptureOptions = {
-        enableJavaScript: false,
-        percyCSS: '',
-      }
-    ) => {
-      setStatus('loading');
-      setError(null);
+  async (
+    name?: string,
+    options?: SnapshotCaptureOptions
+  ) => {
+    setStatus('loading');
+    setError(null);
 
-      try {
-        const pageState = await captureActiveTabState();
+    try {
+      const pageState = await captureActiveTabState();
 
-        const snapshotName =
-          name?.trim() ||
-          formatDefaultSnapshotName(
-            pageState.title,
-            pageState.url
-          );
-
-        await createSnapshot({
-          name: snapshotName,
-          url: pageState.url,
-          dom: pageState.dom,
-          viewportWidth: pageState.viewportWidth,
-          viewportHeight: pageState.viewportHeight,
-
-          enableJavaScript: options.enableJavaScript,
-          percyCSS: options.percyCSS.trim(),
-        });
-
-        setStatus('success');
-        onCaptured?.();
-      } catch (err) {
-        setStatus('error');
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Failed to capture snapshot.'
+      const snapshotName =
+        name?.trim() ||
+        formatDefaultSnapshotName(
+          pageState.title,
+          pageState.url
         );
-      }
-    },
-    [onCaptured]
-  );
+
+      await createSnapshot({
+        name: snapshotName,
+        url: pageState.url,
+        dom: pageState.dom,
+
+        widths: options?.widths ?? [375, 1280],
+        minHeight: options?.minHeight ?? 1024,
+
+        enableJavaScript:
+          options?.enableJavaScript ?? false,
+
+        percyCSS:
+          options?.percyCSS?.trim() || undefined,
+
+        scope:
+          options?.scope?.trim() || undefined,
+      });
+
+      setStatus('success');
+      onCaptured?.();
+    } catch (err) {
+      setStatus('error');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to capture snapshot.'
+      );
+    }
+  },
+  [onCaptured]
+);
 
   const reset = useCallback(() => {
     setStatus('idle');

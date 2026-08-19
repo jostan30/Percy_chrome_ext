@@ -674,3 +674,108 @@ body {
 .textarea::placeholder {
   color: var(--ink-300);
 }
+
+/* ---------- Advanced snapshot options ---------- */
+
+.advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+  border: none;
+  background: transparent;
+  color: var(--violet-600);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.advanced-toggle:hover {
+  color: var(--violet-700);
+}
+
+.advanced-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.advanced-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: var(--ink-100);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.advanced-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.width-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.width-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.width-row .text-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.width-remove {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-500);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.width-remove:hover:not(:disabled) {
+  color: var(--error-600);
+  background: var(--error-100);
+  border-color: #f3aca7;
+}
+
+.width-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-700);
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--violet-600);
+}
+
+.textarea-input {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.4;
+}

@@ -5,16 +5,32 @@
  */
 export interface Snapshot {
   id?: string;
+
   name: string;
   url: string;
   dom: string;
-  viewportWidth: number;
-  viewportHeight: number;
+
+  widths: number[];
+  minHeight: number;
 
   enableJavaScript: boolean;
   percyCSS?: string;
+  scope?: string;
+
+  createdAt?: string;
 }
 
+/**
+ * Options used when capturing or updating a snapshot.
+ */
+export interface SnapshotOptions {
+  name?: string;
+  widths?: number[];
+  minHeight?: number;
+  percyCss?: string;
+  scope?: string;
+  enableJavaScript?: boolean;
+}
 /**
  * Raw browser state captured from the active tab, before a name is attached.
  */

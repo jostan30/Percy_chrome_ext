@@ -12,9 +12,35 @@ export function SnapshotCard({ snapshot }: SnapshotCardProps) {
       <strong>URL</strong>
       <p>{snapshot.url}</p>
 
-      <strong>Viewport</strong>
+      <strong>Widths</strong>
       <p>
-        {snapshot.viewportWidth} × {snapshot.viewportHeight}
+        {snapshot.widths.length > 0
+          ? snapshot.widths.join(' × ')
+          : 'Default'}
+      </p>
+
+      <strong>Minimum Height</strong>
+      <p>{snapshot.minHeight}px</p>
+
+      {snapshot.scope && (
+        <>
+          <strong>Scope</strong>
+          <p>{snapshot.scope}</p>
+        </>
+      )}
+
+      {snapshot.percyCSS && (
+        <>
+          <strong>Percy CSS</strong>
+          <p className="snapshot-card__css">
+            {snapshot.percyCSS}
+          </p>
+        </>
+      )}
+
+      <strong>JavaScript</strong>
+      <p>
+        {snapshot.enableJavaScript ? 'Enabled' : 'Disabled'}
       </p>
     </div>
   );

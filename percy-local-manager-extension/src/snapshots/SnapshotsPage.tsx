@@ -8,11 +8,14 @@ import { FinalizeBuildPanel } from '../components/FinalizeBuildPanel';
 import { ClearSnapshotsButton } from '../components/ClearSnapshotsButton';
 import { BrandMark } from '../components/BrandMark';
 import type { Snapshot } from '../types';
+import { EditSnapshotPanel } from '../components/EditSnapshotPanel';
 
 export function SnapshotsPage() {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingSnapshot, setEditingSnapshot] = useState<Snapshot | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -28,11 +31,18 @@ export function SnapshotsPage() {
   }
 
   async function handleDelete(id: string) {
+    setDeletingId(id);
+
     try {
       await deleteSnapshot(id);
-      await refresh();
+
+      setSnapshots((current) =>
+        current.filter((snapshot) => snapshot.id !== id)
+      );
     } catch (error) {
       console.error('Failed to delete snapshot:', error);
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -49,7 +59,9 @@ export function SnapshotsPage() {
 
             <div className="topbar__brand-text">
               <span className="topbar__title">Percy</span>
-              <span className="topbar__subtitle">Local Manager</span>
+              <span className="topbar__subtitle">
+                Local Manager
+              </span>
             </div>
           </div>
         </div>
@@ -88,7 +100,8 @@ export function SnapshotsPage() {
 
         {!loading && snapshots.length === 0 && (
           <div className="empty-state">
-            No snapshots queued yet. Capture one from the extension popup to get started.
+            No snapshots queued yet. Capture one from the extension
+            popup to get started.
           </div>
         )}
 
@@ -99,7 +112,8 @@ export function SnapshotsPage() {
                 <tr>
                   <th>Name</th>
                   <th>URL</th>
-                  <th>Viewport</th>
+                  <th>Widths</th>
+                  <th>Min Height</th>
                   <th>Options</th>
                   <th>Actions</th>
                 </tr>
@@ -110,11 +124,9 @@ export function SnapshotsPage() {
                   <SnapshotRow
                     key={snapshot.id}
                     snapshot={snapshot}
-                    onDeleted={() => {
-                      if (snapshot.id) {
-                        handleDelete(snapshot.id);
-                      }
-                    }}
+                    deleting={deletingId === snapshot.id}
+                    onDelete={handleDelete}
+                    onEdit={setEditingSnapshot}
                   />
                 ))}
               </tbody>
@@ -153,6 +165,21 @@ export function SnapshotsPage() {
           />
         </div>
       </main>
+      {editingSnapshot && (
+        <EditSnapshotPanel
+          snapshot={editingSnapshot}
+          onClose={() => setEditingSnapshot(null)}
+          onSaved={(updatedSnapshot) => {
+            setSnapshots((current) =>
+              current.map((snapshot) =>
+                snapshot.id === updatedSnapshot.id
+                  ? updatedSnapshot
+                  : snapshot
+              )
+            );
+          }}
+        />
+      )}
     </>
   );
 }
