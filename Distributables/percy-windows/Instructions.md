@@ -1,34 +1,77 @@
-# Server Setup & Usage (Windows)
+# Percy Server Setup & Usage — Windows
 
 ## Prerequisites
 
 * Windows 10 or later
+* Node.js
+* npm
 * `server.exe`
 * `server.bat`
 
-## Folder Structure
+> **Note:** Go is **not** required. The server is already compiled.
+
+---
+
+## 1. Install Node.js
+
+Install the **Node.js LTS** version.
+
+If Windows Package Manager (`winget`) is available, open PowerShell or Command Prompt and run:
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+After installation, close and reopen Command Prompt or PowerShell.
+
+Verify:
+
+```cmd
+node --version
+npm --version
+```
+
+Both commands should display a version number.
+
+> npm is included with the Node.js installation.
+
+---
+
+## 2. Folder Structure
+
+Your Percy folder should look like:
 
 ```text
-project/
+percy-windows/
 ├── server.exe
 ├── server.bat
+└── Instructions.md
 ```
 
 > **Note:** `server.log` and `server.pid` are created automatically when the server starts.
 
 ---
 
-## Starting the Server
+## 3. Start the Server
 
-Open **Command Prompt** or **PowerShell** in the project directory and run:
+Open **Command Prompt** or **PowerShell** inside the `percy-windows` directory.
+
+Run:
 
 ```cmd
 server.bat start
 ```
 
+Expected output:
+
+```text
+Starting server...
+Server started
+```
+
 ---
 
-## Check Status
+## 4. Check Server Status
 
 ```cmd
 server.bat status
@@ -36,7 +79,7 @@ server.bat status
 
 ---
 
-## Stop the Server
+## 5. Stop the Server
 
 ```cmd
 server.bat stop
@@ -44,7 +87,7 @@ server.bat stop
 
 ---
 
-## Restart the Server
+## 6. Restart the Server
 
 ```cmd
 server.bat restart
@@ -52,57 +95,104 @@ server.bat restart
 
 ---
 
-## View Logs
+## 7. View Server Logs
 
-Open `server.log` with any text editor (Notepad, VS Code, etc.).
+The server writes its output to:
+
+```text
+server.log
+```
+
+You can open it using:
+
+* Notepad
+* VS Code
+* Any text editor
 
 ---
 
 ## Generated Files
 
-| File         | Purpose                      |
-| ------------ | ---------------------------- |
-| `server.log` | Server logs                  |
-| `server.pid` | Stores the server process ID |
+The following files are created automatically:
 
-These files are created automatically.
+| File         | Purpose                       |
+| ------------ | ----------------------------- |
+| `server.log` | Stores server output and logs |
+| `server.pid` | Stores the server process ID  |
+
+Do not manually create these files.
 
 ---
 
 ## Troubleshooting
 
-### Windows Defender warning
+### Node.js not found
 
-If Windows SmartScreen displays a warning:
+Check:
 
-1. Click **More info**.
-2. Click **Run anyway**.
+```cmd
+node --version
+```
+
+If it is not installed, run:
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+Close and reopen your terminal, then check:
+
+```cmd
+node --version
+npm --version
+```
 
 ### Server already running
 
-Run:
+Check:
 
 ```cmd
 server.bat status
 ```
 
-If necessary, stop the server:
+If necessary:
 
 ```cmd
 server.bat stop
 ```
 
-Then start it again:
+Then:
 
 ```cmd
 server.bat start
 ```
 
-### Available Commands
+### Server failed to start
 
-| Command              | Description                    |
-| -------------------- | ------------------------------ |
-| `server.bat start`   | Start the server               |
-| `server.bat stop`    | Stop the server                |
-| `server.bat restart` | Restart the server             |
-| `server.bat status`  | Check if the server is running |
+Open:
+
+```text
+server.log
+```
+
+and check the latest error messages.
+
+### Windows SmartScreen warning
+
+If Windows displays a SmartScreen warning because the executable is not digitally signed:
+
+1. Click **More info**.
+2. Click **Run anyway**.
+
+This warning can occur with locally distributed executables that do not have a trusted code-signing certificate.
+
+---
+
+## Available Commands
+
+| Command              | Description         |
+| -------------------- | ------------------- |
+| `server.bat start`   | Start the server    |
+| `server.bat stop`    | Stop the server     |
+| `server.bat restart` | Restart the server  |
+| `server.bat status`  | Check server status |

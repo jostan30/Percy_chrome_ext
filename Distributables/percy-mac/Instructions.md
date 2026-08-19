@@ -1,66 +1,115 @@
-# Server Setup & Usage (macOS)
+# Percy Server Setup & Usage — macOS
 
 ## Prerequisites
 
-* macOS 11 or later
-* The server binary (`server`)
-* The management script (`server.sh`)
+* macOS
+* Node.js
+* npm
+* `server`
+* `server-arm64`
+* `server.sh`
 
-## Folder Structure
+> **Note:** Go is **not** required. The server is already compiled.
 
-```text
-project/
-├── server
-└── server.sh
-```
+The package supports both:
 
-> **Note:** `server.log` and `server.pid` are created automatically when the server starts. You do **not** need to create them manually.
+* Intel Macs
+* Apple Silicon Macs (M1, M2, M3, M4, etc.)
+
+The `server.sh` script automatically detects the Mac architecture and selects the correct binary.
 
 ---
 
-## One-Time Setup
+## 1. Install Node.js and npm
 
-### 1. Open Terminal
+The recommended method is Homebrew.
 
-Open the **Terminal** application and navigate to the project folder.
-
-Example:
+If Homebrew is already installed:
 
 ```bash
-cd /path/to/project
+brew install node
+```
+
+Verify:
+
+```bash
+node --version
+npm --version
+```
+
+Both commands should display a version number.
+
+### If Homebrew is not installed
+
+Install Homebrew from its official website, then run:
+
+```bash
+brew install node
 ```
 
 ---
 
-### 2. Make the files executable
+## 2. Folder Structure
+
+Your Percy folder should look like:
+
+```text
+percy-mac/
+├── server
+├── server-arm64
+├── server.sh
+└── Instructions.md
+```
+
+### Binaries
+
+| File           | Mac                 |
+| -------------- | ------------------- |
+| `server`       | Intel x86_64        |
+| `server-arm64` | Apple Silicon ARM64 |
+
+You do **not** need to choose the binary manually.
+
+`server.sh` automatically selects the correct one.
+
+> **Note:** `server.log` and `server.pid` are created automatically when the server starts.
+
+---
+
+## 3. One-Time Setup
+
+Open Terminal and navigate to the `percy-mac` directory.
+
+Make the files executable:
 
 ```bash
 chmod +x server
+chmod +x server-arm64
 chmod +x server.sh
 ```
 
 ---
 
-### 3. (First Launch Only) Allow the Application
+## 4. Start the Server
 
-If macOS blocks the application because it was downloaded from the Internet, remove the quarantine attribute:
-
-```bash
-xattr -d com.apple.quarantine server
-```
-
-If prompted, you can also allow it from:
-
-**System Settings → Privacy & Security → Open Anyway**
-
----
-
-## Running the Server
-
-### Start the server
+Run:
 
 ```bash
 ./server.sh start
+```
+
+The script automatically detects your Mac architecture.
+
+### Intel Mac
+
+```text
+x86_64 → server
+```
+
+### Apple Silicon Mac
+
+```text
+arm64 → server-arm64
 ```
 
 Expected output:
@@ -73,25 +122,51 @@ Starting server...
 
 ---
 
-### Check server status
+## 5. Check Server Status
 
 ```bash
 ./server.sh status
 ```
 
+If running:
+
+```text
+✅ Running (PID: xxxx)
+```
+
+If not running:
+
+```text
+❌ Not running
+```
+
 ---
 
-### View live logs
+## 6. View Server Logs
+
+To continuously monitor logs:
 
 ```bash
 ./server.sh logs
 ```
 
-Press **Ctrl + C** to stop viewing the logs.
+Press:
+
+```text
+Ctrl + C
+```
+
+to stop viewing the logs.
+
+To view the last 50 lines:
+
+```bash
+tail -n 50 server.log
+```
 
 ---
 
-### Restart the server
+## 7. Restart the Server
 
 ```bash
 ./server.sh restart
@@ -99,10 +174,17 @@ Press **Ctrl + C** to stop viewing the logs.
 
 ---
 
-### Stop the server
+## 8. Stop the Server
 
 ```bash
 ./server.sh stop
+```
+
+Expected output:
+
+```text
+Stopping server...
+✅ Server stopped.
 ```
 
 ---
@@ -111,10 +193,12 @@ Press **Ctrl + C** to stop viewing the logs.
 
 The following files are created automatically:
 
-| File         | Purpose                       |
-| ------------ | ----------------------------- |
-| `server.log` | Stores server logs            |
-| `server.pid` | Stores the running process ID |
+| File         | Purpose                              |
+| ------------ | ------------------------------------ |
+| `server.log` | Stores server output and logs        |
+| `server.pid` | Stores the PID of the running server |
+
+Do not manually create these files.
 
 ---
 
@@ -126,26 +210,36 @@ Run:
 
 ```bash
 chmod +x server
+chmod +x server-arm64
 chmod +x server.sh
 ```
 
----
-
-### "Cannot be opened because Apple cannot check it for malicious software"
-
-Open:
-
-**System Settings → Privacy & Security**
-
-Scroll down and click **Open Anyway**.
-
-Or remove the quarantine attribute:
+Then:
 
 ```bash
-xattr -d com.apple.quarantine server
+./server.sh start
 ```
 
----
+### Node.js not found
+
+Check:
+
+```bash
+node --version
+```
+
+If it is not installed:
+
+```bash
+brew install node
+```
+
+Then:
+
+```bash
+node --version
+npm --version
+```
 
 ### Server already running
 
@@ -155,34 +249,49 @@ Check:
 ./server.sh status
 ```
 
-Stop it:
+If necessary:
 
 ```bash
 ./server.sh stop
 ```
 
-Start again:
+Then:
 
 ```bash
 ./server.sh start
 ```
 
----
+### Server failed to start
 
-### View recent logs
+Check:
 
 ```bash
 tail -n 50 server.log
+```
+
+### Unsupported Mac architecture
+
+Check your architecture:
+
+```bash
+uname -m
+```
+
+Supported values:
+
+```text
+x86_64
+arm64
 ```
 
 ---
 
 ## Available Commands
 
-| Command               | Description                         |
-| --------------------- | ----------------------------------- |
-| `./server.sh start`   | Start the server                    |
-| `./server.sh stop`    | Stop the server                     |
-| `./server.sh restart` | Restart the server                  |
-| `./server.sh status`  | Check whether the server is running |
-| `./server.sh logs`    | View live server logs               |
+| Command               | Description           |
+| --------------------- | --------------------- |
+| `./server.sh start`   | Start the server      |
+| `./server.sh stop`    | Stop the server       |
+| `./server.sh restart` | Restart the server    |
+| `./server.sh status`  | Check server status   |
+| `./server.sh logs`    | View live server logs |
