@@ -63,9 +63,9 @@ percy-mac/
 
 ### Binaries
 
-| File           | Mac                 |
-| -------------- | ------------------- |
-| `server`       | Intel x86_64        |
+| File | Mac |
+|---|---|
+| `server` | Intel x86_64 |
 | `server-arm64` | Apple Silicon ARM64 |
 
 You do **not** need to choose the binary manually.
@@ -90,7 +90,22 @@ chmod +x server.sh
 
 ---
 
-## 4. Start the Server
+## 4. Remove macOS Quarantine
+
+macOS may prevent the binaries from running because they were downloaded or transferred from another computer.
+
+Run:
+
+```bash
+xattr -d com.apple.quarantine server
+xattr -d com.apple.quarantine server-arm64
+```
+
+> **Note:** If you see `No such xattr: com.apple.quarantine`, that's okay. It means the file does not have the quarantine attribute.
+
+---
+
+## 5. Start the Server
 
 Run:
 
@@ -122,7 +137,7 @@ Starting server...
 
 ---
 
-## 5. Check Server Status
+## 6. Check Server Status
 
 ```bash
 ./server.sh status
@@ -142,7 +157,7 @@ If not running:
 
 ---
 
-## 6. View Server Logs
+## 7. View Server Logs
 
 To continuously monitor logs:
 
@@ -166,7 +181,7 @@ tail -n 50 server.log
 
 ---
 
-## 7. Restart the Server
+## 8. Restart the Server
 
 ```bash
 ./server.sh restart
@@ -174,7 +189,7 @@ tail -n 50 server.log
 
 ---
 
-## 8. Stop the Server
+## 9. Stop the Server
 
 ```bash
 ./server.sh stop
@@ -193,9 +208,9 @@ Stopping server...
 
 The following files are created automatically:
 
-| File         | Purpose                              |
-| ------------ | ------------------------------------ |
-| `server.log` | Stores server output and logs        |
+| File | Purpose |
+|---|---|
+| `server.log` | Stores server output and logs |
 | `server.pid` | Stores the PID of the running server |
 
 Do not manually create these files.
@@ -212,6 +227,21 @@ Run:
 chmod +x server
 chmod +x server-arm64
 chmod +x server.sh
+```
+
+Then:
+
+```bash
+./server.sh start
+```
+
+### macOS quarantine issue
+
+If macOS prevents the binary from running, run:
+
+```bash
+xattr -d com.apple.quarantine server
+xattr -d com.apple.quarantine server-arm64
 ```
 
 Then:
@@ -288,10 +318,10 @@ arm64
 
 ## Available Commands
 
-| Command               | Description           |
-| --------------------- | --------------------- |
-| `./server.sh start`   | Start the server      |
-| `./server.sh stop`    | Stop the server       |
-| `./server.sh restart` | Restart the server    |
-| `./server.sh status`  | Check server status   |
-| `./server.sh logs`    | View live server logs |
+| Command | Description |
+|---|---|
+| `./server.sh start` | Start the server |
+| `./server.sh stop` | Stop the server |
+| `./server.sh restart` | Restart the server |
+| `./server.sh status` | Check server status |
+| `./server.sh logs` | View live server logs |

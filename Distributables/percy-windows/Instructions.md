@@ -59,7 +59,7 @@ Open **Command Prompt** or **PowerShell** inside the `percy-windows` directory.
 Run:
 
 ```cmd
-server.bat start
+./server.bat start
 ```
 
 Expected output:
@@ -74,7 +74,7 @@ Server started
 ## 4. Check Server Status
 
 ```cmd
-server.bat status
+./server.bat status
 ```
 
 ---
@@ -82,7 +82,7 @@ server.bat status
 ## 5. Stop the Server
 
 ```cmd
-server.bat stop
+./server.bat stop
 ```
 
 ---
@@ -90,7 +90,7 @@ server.bat stop
 ## 6. Restart the Server
 
 ```cmd
-server.bat restart
+./server.bat restart
 ```
 
 ---
@@ -152,19 +152,19 @@ npm --version
 Check:
 
 ```cmd
-server.bat status
+./server.bat status
 ```
 
 If necessary:
 
 ```cmd
-server.bat stop
+./server.bat stop
 ```
 
 Then:
 
 ```cmd
-server.bat start
+./server.bat start
 ```
 
 ### Server failed to start
