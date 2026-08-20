@@ -5,18 +5,19 @@ interface LibraryMatchesProps {
   isSearching: boolean;
 }
 
-function openLibrary(ref: LibrarySnapshotReference) {
-  chrome.storage.local.set(
-    {
-      'library:selectedSnapshot': ref,
-      'library:searchQuery': ref.name,
-    },
-    () => {
-      chrome.tabs.create({
-        url: chrome.runtime.getURL('library.html'),
-      });
-    }
-  );
+function openSnapshotInLibrary(
+  snapshot: LibrarySnapshotReference
+) {
+  const params = new URLSearchParams();
+
+  params.set('search', snapshot.name);
+  params.set('snapshotId', snapshot.id);
+
+  chrome.tabs.create({
+    url: chrome.runtime.getURL(
+      `library.html?${params.toString()}`
+    ),
+  });
 }
 
 export function LibraryMatches({
@@ -38,43 +39,49 @@ export function LibraryMatches({
   return (
     <div className="library-matches">
       <span className="field-label">
-        Existing snapshot{results.length > 1 ? 's' : ''} found
+        Existing snapshot
+        {results.length > 1 ? 's' : ''} found
       </span>
 
-      {results.map((ref) => (
-        <button
-          key={`${ref.buildId ?? ''}-${ref.name}`}
-          type="button"
-          className="library-match"
-          onClick={() => openLibrary(ref)}
-        >
-          {ref.previewUrl ? (
-            <img
-              className="library-match__preview"
-              src={ref.previewUrl}
-              alt=""
-            />
-          ) : (
-            <div className="library-match__preview library-match__preview--empty" />
-          )}
+      {results.map((snapshot) => {
+        const firstComparison =
+          snapshot.comparisons[0];
 
-          <div className="library-match__meta">
-            <span className="library-match__name">
-              {ref.name}
-            </span>
-
-            {ref.testCaseName && (
-              <span className="library-match__test">
-                {ref.testCaseName}
-              </span>
+        return (
+          <button
+            key={`${snapshot.buildId}-${snapshot.id}`}
+            className="library-match"
+            type="button"
+            onClick={() =>
+              openSnapshotInLibrary(snapshot)
+            }
+          >
+            {firstComparison?.previewUrl ? (
+              <img
+                className="library-match__preview"
+                src={firstComparison.previewUrl}
+                alt={snapshot.name}
+              />
+            ) : (
+              <div className="library-match__preview library-match__preview--empty" />
             )}
-          </div>
 
-          <span className="library-match__arrow">
-            →
-          </span>
-        </button>
-      ))}
+            <div className="library-match__meta">
+              <span className="library-match__name">
+                {snapshot.name}
+              </span>
+
+              <span className="library-match__test">
+                {snapshot.comparisons.length}{' '}
+                comparison
+                {snapshot.comparisons.length === 1
+                  ? ''
+                  : 's'}
+              </span>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

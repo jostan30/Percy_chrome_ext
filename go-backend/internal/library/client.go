@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	percyAPI      = "https://percy.io/api/v1"
+	percyAPI       = "https://percy.io/api/v1"
 	requestTimeout = 15 * time.Second
 )
 
 // Client talks to Percy's read-only API and converts Percy's JSON:API
-// payloads into SnapshotReference values. No Percy-shaped type defined in
-// this file is ever returned from LoadLibrary — callers only ever see
-// SnapshotReference.
+// payloads into SnapshotReference values.
+//
+// Percy JSON:API structures never leave this package.
 type Client struct {
 	token string
 	http  *http.Client
@@ -31,6 +31,10 @@ func NewClient(token string) *Client {
 	}
 }
 
+// ----------------------------------------------------------------------
+// HTTP
+// ----------------------------------------------------------------------
+
 func (c *Client) do(req *http.Request, out any) error {
 	req.Header.Set("Authorization", "Token token="+c.token)
 	req.Header.Set("User-Agent", "Percy-Local-Manager/1.0")
@@ -40,10 +44,15 @@ func (c *Client) do(req *http.Request, out any) error {
 	if err != nil {
 		return err
 	}
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {
-		return fmt.Errorf("percy returned status %d for %s", resp.StatusCode, req.URL.String())
+		return fmt.Errorf(
+			"percy returned status %d for %s",
+			resp.StatusCode,
+			req.URL.String(),
+		)
 	}
 
 	return json.NewDecoder(resp.Body).Decode(out)
@@ -67,12 +76,17 @@ type buildResponse struct {
 }
 
 func (c *Client) fetchBuilds() ([]build, error) {
-	req, err := http.NewRequest(http.MethodGet, percyAPI+"/builds", nil)
+	req, err := http.NewRequest(
+		http.MethodGet,
+		percyAPI+"/builds",
+		nil,
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	var res buildResponse
+
 	if err := c.do(req, &res); err != nil {
 		return nil, fmt.Errorf("fetching builds: %w", err)
 	}
@@ -80,17 +94,23 @@ func (c *Client) fetchBuilds() ([]build, error) {
 	return res.Data, nil
 }
 
-// createdAt parses the build's created-at timestamp. Builds that fail to
-// parse (or have no timestamp) sort as oldest, so they never incorrectly
-// win a "prefer the newest" dedup.
+// createdAt parses the build's created-at timestamp.
+//
+// Builds that fail to parse, or have no timestamp, sort as oldest.
 func (b build) createdAt() time.Time {
 	if b.Attributes.CreatedAt == "" {
 		return time.Time{}
 	}
-	t, err := time.Parse(time.RFC3339, b.Attributes.CreatedAt)
+
+	t, err := time.Parse(
+		time.RFC3339,
+		b.Attributes.CreatedAt,
+	)
+
 	if err != nil {
 		return time.Time{}
 	}
+
 	return t
 }
 
@@ -99,8 +119,10 @@ func (b build) createdAt() time.Time {
 // ----------------------------------------------------------------------
 
 type snapshotAttributes struct {
-	Name         string `json:"name"`
-	TestCaseName string `json:"test-case-name"`
+	Name             string `json:"name"`
+	TestCaseName     string `json:"test-case-name"`
+	EnableJavaScript bool   `json:"enable-javascript"`
+	ScopeSelector    string `json:"scope-selector"`
 }
 
 type relationshipRef struct {
@@ -123,9 +145,56 @@ type snapshot struct {
 	Relationships snapshotRelationships `json:"relationships"`
 }
 
-// includedObject is a single entry in Percy's polymorphic `included[]`
-// array. Its actual shape depends on Type, so Attributes/Relationships are
-// decoded lazily by the index builder below.
+type snapshotResponse struct {
+	Data     []snapshot       `json:"data"`
+	Included []includedObject `json:"included"`
+}
+
+func (c *Client) fetchSnapshots(buildID string) (*snapshotResponse, error) {
+	url := percyAPI + "/snapshots?build_id=" + buildID
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		url,
+		nil,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res snapshotResponse
+
+	if err := c.do(req, &res); err != nil {
+		return nil, fmt.Errorf(
+			"fetching snapshots for build %s: %w",
+			buildID,
+			err,
+		)
+	}
+
+	return &res, nil
+}
+
+// ----------------------------------------------------------------------
+// Included objects
+// ----------------------------------------------------------------------
+//
+// Percy uses JSON:API's included[] array.
+//
+// Snapshot
+//   ↓
+// Comparison
+//   ↓
+// Head Screenshot
+//   ↓
+// Image
+//   ↓
+// Image URL
+//
+// We build an index once per build so that resolving each comparison
+// remains O(1).
+
 type includedObject struct {
 	Type          string          `json:"type"`
 	ID            string          `json:"id"`
@@ -133,78 +202,110 @@ type includedObject struct {
 	Relationships json.RawMessage `json:"relationships"`
 }
 
-type snapshotResponse struct {
-	Data     []snapshot       `json:"data"`
-	Included []includedObject `json:"included"`
-}
-
-func (c *Client) fetchSnapshots(buildID string) (*snapshotResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, percyAPI+"/snapshots?build_id="+buildID, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var res snapshotResponse
-	if err := c.do(req, &res); err != nil {
-		return nil, fmt.Errorf("fetching snapshots for build %s: %w", buildID, err)
-	}
-
-	return &res, nil
-}
-
 // ----------------------------------------------------------------------
-// Relationship traversal: snapshot -> comparison -> head-screenshot -> image
+// Comparisons
 // ----------------------------------------------------------------------
+
+type comparisonAttributes struct {
+	Width int `json:"width"`
+}
 
 type comparisonRelationships struct {
 	HeadScreenshot relationshipRef `json:"head-screenshot"`
 }
 
+type comparisonData struct {
+	Attributes    comparisonAttributes
+	Relationships comparisonRelationships
+}
+
+// ----------------------------------------------------------------------
+// Screenshots
+// ----------------------------------------------------------------------
+
 type screenshotRelationships struct {
 	Image relationshipRef `json:"image"`
 }
 
+// ----------------------------------------------------------------------
+// Images
+// ----------------------------------------------------------------------
+
 type imageAttributes struct {
-	URL string `json:"url"`
+	URL    string `json:"url"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
-// includedIndex is a one-time-per-build lookup built from the `included[]`
-// array, so resolving a preview URL for each snapshot in the build is O(1)
-// instead of re-parsing `included` for every snapshot.
+// ----------------------------------------------------------------------
+// Included index
+// ----------------------------------------------------------------------
+
 type includedIndex struct {
-	comparisons map[string]comparisonRelationships
+	comparisons map[string]comparisonData
 	screenshots map[string]screenshotRelationships
 	images      map[string]imageAttributes
 }
 
-func buildIncludedIndex(included []includedObject) *includedIndex {
+func buildIncludedIndex(
+	included []includedObject,
+) *includedIndex {
+
 	idx := &includedIndex{
-		comparisons: make(map[string]comparisonRelationships),
+		comparisons: make(map[string]comparisonData),
 		screenshots: make(map[string]screenshotRelationships),
 		images:      make(map[string]imageAttributes),
 	}
 
 	for _, item := range included {
 		switch item.Type {
+
 		case "comparisons":
-			var rel comparisonRelationships
-			if err := json.Unmarshal(item.Relationships, &rel); err != nil {
+			var attrs comparisonAttributes
+
+			if err := json.Unmarshal(
+				item.Attributes,
+				&attrs,
+			); err != nil {
 				continue
 			}
-			idx.comparisons[item.ID] = rel
+
+			var rel comparisonRelationships
+
+			if err := json.Unmarshal(
+				item.Relationships,
+				&rel,
+			); err != nil {
+				continue
+			}
+
+			idx.comparisons[item.ID] = comparisonData{
+				Attributes:    attrs,
+				Relationships: rel,
+			}
 
 		case "screenshots":
 			var rel screenshotRelationships
-			if err := json.Unmarshal(item.Relationships, &rel); err != nil {
+
+			if err := json.Unmarshal(
+				item.Relationships,
+				&rel,
+			); err != nil {
 				continue
 			}
+
 			idx.screenshots[item.ID] = rel
 
 		case "images":
 			var attrs imageAttributes
-			if err := json.Unmarshal(item.Attributes, &attrs); err != nil {
+
+			if err := json.Unmarshal(
+				item.Attributes,
+				&attrs,
+			); err != nil {
 				continue
 			}
+
 			idx.images[item.ID] = attrs
 		}
 	}
@@ -212,69 +313,118 @@ func buildIncludedIndex(included []includedObject) *includedIndex {
 	return idx
 }
 
-// resolvePreviewURL walks snapshot -> comparison -> head-screenshot -> image
-// -> attributes.url. Returns "" if any hop in the chain is missing rather
-// than erroring, since a missing preview shouldn't fail the whole library.
-func (idx *includedIndex) resolvePreviewURL(s snapshot) string {
-	if len(s.Relationships.Comparisons.Data) == 0 {
-		return ""
+// ----------------------------------------------------------------------
+// Resolve all comparisons for a snapshot
+// ----------------------------------------------------------------------
+//
+// A Percy snapshot can have multiple comparisons:
+//
+// snapshot
+//   ├── comparison @ 375px
+//   ├── comparison @ 768px
+//   └── comparison @ 1280px
+//
+// Each comparison points to a head screenshot, which points to an image.
+//
+// We return all of them instead of only the first comparison.
+
+func (idx *includedIndex) resolveComparisons(
+	s snapshot,
+) []SnapshotComparison {
+
+	result := make(
+		[]SnapshotComparison,
+		0,
+		len(s.Relationships.Comparisons.Data),
+	)
+
+	for _, comparisonRef := range s.Relationships.Comparisons.Data {
+		comparison, ok := idx.comparisons[comparisonRef.ID]
+
+		if !ok {
+			continue
+		}
+
+		screenshotID :=
+			comparison.Relationships.HeadScreenshot.Data.ID
+
+		if screenshotID == "" {
+			continue
+		}
+
+		screenshot, ok := idx.screenshots[screenshotID]
+
+		if !ok {
+			continue
+		}
+
+		imageID := screenshot.Image.Data.ID
+
+		if imageID == "" {
+			continue
+		}
+
+		image, ok := idx.images[imageID]
+
+		if !ok {
+			continue
+		}
+
+		result = append(
+			result,
+			SnapshotComparison{
+				ID:         comparisonRef.ID,
+				Width:      comparison.Attributes.Width,
+				PreviewURL: image.URL,
+				Height:     image.Height,
+			},
+		)
 	}
 
-	comparisonID := s.Relationships.Comparisons.Data[0].ID
-	comparison, ok := idx.comparisons[comparisonID]
-	if !ok {
-		return ""
-	}
-
-	screenshotID := comparison.HeadScreenshot.Data.ID
-	if screenshotID == "" {
-		return ""
-	}
-	screenshotRel, ok := idx.screenshots[screenshotID]
-	if !ok {
-		return ""
-	}
-
-	imageID := screenshotRel.Image.Data.ID
-	if imageID == "" {
-		return ""
-	}
-	imageAttrs, ok := idx.images[imageID]
-	if !ok {
-		return ""
-	}
-
-	return imageAttrs.URL
+	return result
 }
 
 // ----------------------------------------------------------------------
-// Public entry point
+// Build snapshots
 // ----------------------------------------------------------------------
+//
+// buildSnapshots pairs a fetched build with its snapshots.
+//
+// buildRank:
+//   0 = newest build
+//   1 = second newest
+//   2 = third newest
+//
+// This allows deduplication to prefer the newest snapshot.
 
-// buildSnapshots pairs a fetched build with its resolved snapshots, ordered
-// most-recent-build-first, so the caller can dedup by preferring the
-// snapshot from the newest build without racing on goroutine completion
-// order.
 type buildSnapshots struct {
-	buildRank int // 0 = newest build
+	buildRank int
 	refs      []SnapshotReference
 }
 
+// ----------------------------------------------------------------------
+// Load library
+// ----------------------------------------------------------------------
+
 // LoadLibrary fetches every build, fetches every build's snapshots
-// concurrently, resolves each snapshot's preview image through Percy's
-// relationship graph, and returns SnapshotReference values only. Callers
-// never see builds[], data[], included[], or any other Percy JSON:API
-// shape.
+// concurrently, resolves all comparison preview images, and returns
+// SnapshotReference values.
+//
+// The rest of the application never sees Percy's JSON:API structures.
 func (c *Client) LoadLibrary() ([]SnapshotReference, error) {
+
 	builds, err := c.fetchBuilds()
+
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[library] fetched %d builds from percy", len(builds))
+	log.Printf(
+		"[library] fetched %d builds from percy",
+		len(builds),
+	)
 
-	// Newest first, so buildRank (the slice index) doubles as a recency
-	// rank: lower rank == newer build.
+	// Newest builds first.
 	sortBuildsNewestFirst(builds)
 
 	type fetchResult struct {
@@ -282,91 +432,192 @@ func (c *Client) LoadLibrary() ([]SnapshotReference, error) {
 		err error
 	}
 
-	resultsCh := make(chan fetchResult, len(builds))
+	resultsCh := make(
+		chan fetchResult,
+		len(builds),
+	)
 
+	// Fetch each build concurrently.
 	for rank, b := range builds {
+
 		go func(rank int, b build) {
+
 			refs, err := c.snapshotsForBuild(b)
+
 			if err != nil {
-				resultsCh <- fetchResult{err: err}
+				resultsCh <- fetchResult{
+					err: err,
+				}
 				return
 			}
-			resultsCh <- fetchResult{bs: buildSnapshots{buildRank: rank, refs: refs}}
+
+			resultsCh <- fetchResult{
+				bs: buildSnapshots{
+					buildRank: rank,
+					refs:      refs,
+				},
+			}
+
 		}(rank, b)
 	}
 
-	all := make([]buildSnapshots, 0, len(builds))
+	all := make(
+		[]buildSnapshots,
+		0,
+		len(builds),
+	)
+
 	for range builds {
+
 		r := <-resultsCh
+
 		if r.err != nil {
-			log.Printf("[library] error fetching snapshots: %v", r.err)
+			log.Printf(
+				"[library] error fetching snapshots: %v",
+				r.err,
+			)
+
 			return nil, r.err
 		}
+
 		all = append(all, r.bs)
 	}
 
 	result := dedupeNewestFirst(all)
-	log.Printf("[library] cached %d unique snapshots (deduped from %d builds)", len(result), len(builds))
+
+	log.Printf(
+		"[library] cached %d unique snapshots (deduped from %d builds)",
+		len(result),
+		len(builds),
+	)
 
 	return result, nil
 }
 
-func (c *Client) snapshotsForBuild(b build) ([]SnapshotReference, error) {
+// ----------------------------------------------------------------------
+// Fetch snapshots for one build
+// ----------------------------------------------------------------------
+
+func (c *Client) snapshotsForBuild(
+	b build,
+) ([]SnapshotReference, error) {
+
 	snapshotsRes, err := c.fetchSnapshots(b.ID)
+
 	if err != nil {
 		return nil, err
 	}
 
-	idx := buildIncludedIndex(snapshotsRes.Included)
+	idx := buildIncludedIndex(
+		snapshotsRes.Included,
+	)
 
-	refs := make([]SnapshotReference, 0, len(snapshotsRes.Data))
-	missingPreview := 0
+	refs := make(
+		[]SnapshotReference,
+		0,
+		len(snapshotsRes.Data),
+	)
+
+	missingComparisons := 0
+
 	for _, s := range snapshotsRes.Data {
-		previewURL := idx.resolvePreviewURL(s)
-		if previewURL == "" {
-			missingPreview++
+
+		comparisons := idx.resolveComparisons(s)
+
+		if len(comparisons) == 0 {
+			missingComparisons++
 		}
-		refs = append(refs, SnapshotReference{
-			Name:         s.Attributes.Name,
-			PreviewURL:   previewURL,
-			TestCaseName: s.Attributes.TestCaseName,
-			BuildID:      b.ID,
-		})
+
+		refs = append(
+			refs,
+			SnapshotReference{
+				ID:               s.ID,
+				Name:             s.Attributes.Name,
+				TestCaseName:     s.Attributes.TestCaseName,
+				BuildID:          b.ID,
+				EnableJavaScript: s.Attributes.EnableJavaScript,
+				Scope:            s.Attributes.ScopeSelector,
+				Comparisons:      comparisons,
+			},
+		)
 	}
 
-	log.Printf("[library] build %s -> %d snapshots (%d missing preview)", b.ID, len(refs), missingPreview)
+	log.Printf(
+		"[library] build %s -> %d snapshots (%d missing comparisons)",
+		b.ID,
+		len(refs),
+		missingComparisons,
+	)
 
 	return refs, nil
 }
 
-func sortBuildsNewestFirst(builds []build) {
-	// Simple insertion sort: build lists are small (typically dozens, not
-	// thousands), so this avoids pulling in "sort" for a one-line compare.
+// ----------------------------------------------------------------------
+// Sort builds newest first
+// ----------------------------------------------------------------------
+
+func sortBuildsNewestFirst(
+	builds []build,
+) {
+
+	// Simple insertion sort.
+	//
+	// Build lists are normally small, so this keeps the implementation
+	// straightforward without additional complexity.
+
 	for i := 1; i < len(builds); i++ {
-		for j := i; j > 0 && builds[j].createdAt().After(builds[j-1].createdAt()); j-- {
-			builds[j], builds[j-1] = builds[j-1], builds[j]
+
+		for j := i; j > 0 &&
+			builds[j].createdAt().After(
+				builds[j-1].createdAt(),
+			); j-- {
+
+			builds[j], builds[j-1] =
+				builds[j-1], builds[j]
 		}
 	}
 }
 
-// dedupeNewestFirst keeps exactly one SnapshotReference per name, preferring
-// the one from the lowest buildRank (i.e. the newest build). This is
-// deterministic regardless of which goroutine in LoadLibrary finished first.
-func dedupeNewestFirst(all []buildSnapshots) []SnapshotReference {
-	bestRank := make(map[string]int)
-	best := make(map[string]SnapshotReference)
+// ----------------------------------------------------------------------
+// Deduplicate snapshots
+// ----------------------------------------------------------------------
+//
+// Keeps exactly one SnapshotReference per snapshot name.
+//
+// If the same name exists in multiple builds, the newest build wins.
+
+func dedupeNewestFirst(
+	all []buildSnapshots,
+) []SnapshotReference {
+
+	bestRank := make(
+		map[string]int,
+	)
+
+	best := make(
+		map[string]SnapshotReference,
+	)
 
 	for _, bs := range all {
+
 		for _, ref := range bs.refs {
+
 			rank, seen := bestRank[ref.Name]
+
 			if !seen || bs.buildRank < rank {
+
 				bestRank[ref.Name] = bs.buildRank
 				best[ref.Name] = ref
 			}
 		}
 	}
 
-	out := make([]SnapshotReference, 0, len(best))
+	out := make(
+		[]SnapshotReference,
+		0,
+		len(best),
+	)
+
 	for _, ref := range best {
 		out = append(out, ref)
 	}

@@ -51,12 +51,7 @@ export interface FinalizeBuildResponse {
   buildUrl: string;
 }
 
-export interface LibrarySnapshotReference {
-  name: string;
-  previewUrl: string;
-  testCaseName?: string;
-  buildId?: string;
-}
+
 /**
  * Connection status against GET /health.
  */
@@ -66,3 +61,19 @@ export type ConnectionStatus = 'checking' | 'connected' | 'offline';
  * Generic async lifecycle status used by capture/finalize hooks.
  */
 export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error';
+
+
+export interface LibraryComparison {
+  id: string;
+  width: number;
+  height: number;
+  previewUrl: string;
+}
+
+export interface LibrarySnapshotReference {
+  id: string;
+  name: string;
+  buildId: string;
+  enableJavaScript: boolean;
+  comparisons: LibraryComparison[];
+}

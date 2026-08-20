@@ -10,7 +10,6 @@ export default defineConfig({
         popup: resolve(__dirname, "index.html"),
         library: resolve(__dirname, "library.html"),
         snapshots: resolve(__dirname, "snapshots.html"),
-        librarySnapshot: resolve(__dirname, "library-snapshot.html"),
       },
     },
   },
