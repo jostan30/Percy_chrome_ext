@@ -3,7 +3,17 @@
 # Change to the directory where this script is located
 cd "$(dirname "$0")"
 
-APP="./server"
+ARCH=$(uname -m)
+
+if [ "$ARCH" = "arm64" ]; then
+    APP="./server-arm64"
+elif [ "$ARCH" = "x86_64" ]; then
+    APP="./server"
+else
+    echo "❌ Unsupported Mac architecture: $ARCH"
+    exit 1
+fi
+
 PIDFILE="server.pid"
 LOGFILE="server.log"
 

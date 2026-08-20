@@ -1,28 +1,57 @@
-# Server Setup & Usage
+# Percy Server Setup & Usage — Linux
 
 ## Prerequisites
 
 * Linux operating system
-* The server binary (`server`)
-* The management script (`server.sh`)
+* Node.js
+* npm
+* `server`
+* `server.sh`
 
-## Folder Structure
-
-```
-project/
-├── server
-└── server.sh
-```
-
-> **Note:** `server.log` and `server.pid` are created automatically when the server starts. You do **not** need to create them manually.
+> **Note:** Go is **not** required. The server is already compiled.
 
 ---
 
-## One-Time Setup
+## 1. Install Node.js and npm
 
-1. Open a terminal in the project directory.
+For Ubuntu/Debian-based Linux:
 
-2. Make the files executable:
+```bash
+sudo apt update
+sudo apt install nodejs npm
+```
+
+Verify the installation:
+
+```bash
+node --version
+npm --version
+```
+
+Both commands should display a version number.
+
+---
+
+## 2. Folder Structure
+
+Your Percy folder should look like:
+
+```text
+percy-linux/
+├── server
+├── server.sh
+└── Instructions.md
+```
+
+> **Note:** `server.log` and `server.pid` are created automatically when the server starts. You do not need to create them manually.
+
+---
+
+## 3. One-Time Setup
+
+Open a terminal inside the `percy-linux` directory.
+
+Make the server and script executable:
 
 ```bash
 chmod +x server
@@ -31,9 +60,9 @@ chmod +x server.sh
 
 ---
 
-## Running the Server
+## 4. Start the Server
 
-### Start the server
+Run:
 
 ```bash
 ./server.sh start
@@ -41,7 +70,7 @@ chmod +x server.sh
 
 Expected output:
 
-```
+```text
 Starting server...
 ✅ Server started (PID: xxxx)
 📄 Logs: server.log
@@ -49,39 +78,53 @@ Starting server...
 
 ---
 
-### Check server status
+## 5. Check Server Status
+
+Run:
 
 ```bash
 ./server.sh status
 ```
 
-Output examples:
+If running:
 
-```
+```text
 ✅ Running (PID: xxxx)
 ```
 
-or
+If not running:
 
-```
+```text
 ❌ Not running
 ```
 
 ---
 
-### View server logs
+## 6. View Server Logs
 
-To continuously monitor the logs:
+To continuously monitor the server logs:
 
 ```bash
 ./server.sh logs
 ```
 
-Press **Ctrl + C** to stop viewing the logs.
+Press:
+
+```text
+Ctrl + C
+```
+
+to stop viewing the logs.
+
+To view the last 50 lines:
+
+```bash
+tail -n 50 server.log
+```
 
 ---
 
-### Restart the server
+## 7. Restart the Server
 
 ```bash
 ./server.sh restart
@@ -89,7 +132,7 @@ Press **Ctrl + C** to stop viewing the logs.
 
 ---
 
-### Stop the server
+## 8. Stop the Server
 
 ```bash
 ./server.sh stop
@@ -97,7 +140,7 @@ Press **Ctrl + C** to stop viewing the logs.
 
 Expected output:
 
-```
+```text
 Stopping server...
 ✅ Server stopped.
 ```
@@ -106,14 +149,14 @@ Stopping server...
 
 ## Generated Files
 
-After starting the server, the following files are created automatically:
+The following files are created automatically:
 
-| File         | Purpose                                           |
-| ------------ | ------------------------------------------------- |
-| `server.log` | Stores the server output and logs                 |
-| `server.pid` | Stores the Process ID (PID) of the running server |
+| File         | Purpose                              |
+| ------------ | ------------------------------------ |
+| `server.log` | Stores server output and logs        |
+| `server.pid` | Stores the PID of the running server |
 
-Do **not** edit or delete these files while the server is running.
+Do not manually create these files.
 
 ---
 
@@ -121,40 +164,64 @@ Do **not** edit or delete these files while the server is running.
 
 ### Permission denied
 
-If you see a permission error, run:
+If you receive a permission error:
 
 ```bash
 chmod +x server
 chmod +x server.sh
 ```
 
----
-
-### Server already running
-
-Check the status:
-
-```bash
-./server.sh status
-```
-
-If necessary, stop the existing instance:
-
-```bash
-./server.sh stop
-```
-
-Then start it again:
+Then try again:
 
 ```bash
 ./server.sh start
 ```
 
----
+### Node.js not found
 
-### View recent logs
+Check:
 
-To see the latest log entries without following them:
+```bash
+node --version
+```
+
+If the command is not found, install Node.js:
+
+```bash
+sudo apt update
+sudo apt install nodejs npm
+```
+
+Then verify:
+
+```bash
+node --version
+npm --version
+```
+
+### Server already running
+
+Check:
+
+```bash
+./server.sh status
+```
+
+If necessary:
+
+```bash
+./server.sh stop
+```
+
+Then:
+
+```bash
+./server.sh start
+```
+
+### Server failed to start
+
+Check the logs:
 
 ```bash
 tail -n 50 server.log
@@ -164,10 +231,10 @@ tail -n 50 server.log
 
 ## Available Commands
 
-| Command               | Description                    |
-| --------------------- | ------------------------------ |
-| `./server.sh start`   | Start the server               |
-| `./server.sh stop`    | Stop the server                |
-| `./server.sh restart` | Restart the server             |
-| `./server.sh status`  | Check if the server is running |
-| `./server.sh logs`    | View live server logs          |
+| Command               | Description           |
+| --------------------- | --------------------- |
+| `./server.sh start`   | Start the server      |
+| `./server.sh stop`    | Stop the server       |
+| `./server.sh restart` | Restart the server    |
+| `./server.sh status`  | Check server status   |
+| `./server.sh logs`    | View live server logs |
