@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Percy Local Manager",
+  "version": "1.0.0",
+  "description": "Capture browser state (DOM, URL, viewport) and send it to the local Percy Local Manager backend.",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Percy Local Manager",
+    "default_icon": "icons/percy-icon.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:4321/*"
+  ],
+  "icons": {
+    "16": "icons/percy-icon.png",
+    "48": "icons/percy-icon.png",
+    "128": "icons/percy-icon.png"
+  }
+}

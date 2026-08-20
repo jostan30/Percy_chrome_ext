@@ -1,0 +1,148 @@
+name: Build and Release Percy Local Manager
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build distributables and create release
+    runs-on: ubuntu-latest
+
+    steps:
+      # ------------------------------------------------------
+      # Checkout
+      # ------------------------------------------------------
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------
+      # Setup Go
+      # ------------------------------------------------------
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      # ------------------------------------------------------
+      # Setup Node
+      # ------------------------------------------------------
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # ------------------------------------------------------
+      # Make build script executable
+      # ------------------------------------------------------
+
+      - name: Make build script executable
+        run: chmod +x build-distributables.sh
+
+      # ------------------------------------------------------
+      # Build everything
+      #
+      # This generates:
+      #
+      # Distributables/
+      # ├── percy-linux/
+      # ├── percy-mac/
+      # ├── percy-windows/
+      # └── percy-local-manager-extension/
+      # ------------------------------------------------------
+
+      - name: Build distributables
+        run: ./build-distributables.sh
+
+      # ------------------------------------------------------
+      # Verify output
+      # ------------------------------------------------------
+
+      - name: Verify distributables
+        run: |
+          echo "=========================================="
+          echo "Distributables"
+          echo "=========================================="
+
+          find Distributables -maxdepth 3 -type f | sort
+
+          echo
+          echo "Checking required files..."
+
+          test -f Distributables/percy-linux/server
+          test -f Distributables/percy-linux/server.sh
+
+          test -f Distributables/percy-mac/server
+          test -f Distributables/percy-mac/server-arm64
+          test -f Distributables/percy-mac/server.sh
+
+          test -f Distributables/percy-windows/server.exe
+          test -f Distributables/percy-windows/server.bat
+
+          test -d Distributables/percy-local-manager-extension
+
+          echo
+          echo "✅ All distributables verified"
+
+      # ------------------------------------------------------
+      # Create ZIP files
+      # ------------------------------------------------------
+
+      - name: Package Linux
+        run: |
+          cd Distributables
+          zip -r ../percy-local-manager-linux.zip percy-linux
+
+      - name: Package macOS
+        run: |
+          cd Distributables
+          zip -r ../percy-local-manager-mac.zip percy-mac
+
+      - name: Package Windows
+        run: |
+          cd Distributables
+          zip -r ../percy-local-manager-windows.zip percy-windows
+
+      - name: Package Chrome Extension
+        run: |
+          cd Distributables
+          zip -r ../percy-local-manager-extension.zip percy-local-manager-extension
+
+      # ------------------------------------------------------
+      # Show generated ZIPs
+      # ------------------------------------------------------
+
+      - name: Show release files
+        run: |
+          echo "=========================================="
+          echo "Release files"
+          echo "=========================================="
+
+          ls -lh \
+            percy-local-manager-linux.zip \
+            percy-local-manager-mac.zip \
+            percy-local-manager-windows.zip \
+            percy-local-manager-extension.zip
+
+      # ------------------------------------------------------
+      # Create GitHub Release
+      # ------------------------------------------------------
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            percy-local-manager-linux.zip \
+            percy-local-manager-mac.zip \
+            percy-local-manager-windows.zip \
+            percy-local-manager-extension.zip \
+            --title "Percy Local Manager ${{ github.ref_name }}" \
+            --generate-notes
