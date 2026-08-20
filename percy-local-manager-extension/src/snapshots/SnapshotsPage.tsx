@@ -55,7 +55,7 @@ export function SnapshotsPage() {
       <div className="topbar">
         <div className="topbar__inner">
           <div className="topbar__brand">
-            <BrandMark size={24} />
+            <BrandMark  />
 
             <div className="topbar__brand-text">
               <span className="topbar__title">Percy</span>
